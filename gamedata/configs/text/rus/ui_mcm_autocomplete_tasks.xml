@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<string_table>
+	<string id="ui_mcm_menu_autocomplete_tasks">
+		<text>Autocomplete</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_title">
+		<text>Autocomplete Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_enable_autocomplete">
+		<text>Включить автоматическое завершение</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_enable_autocomplete_desc">
+		<text>Включает логику автоматическое завершение</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_enable_debug">
+		<text>Включить отладочного журналов</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_enable_debug_desc">
+		<text>Полезно только для моддеров</text>
+	</string>
+</string_table>

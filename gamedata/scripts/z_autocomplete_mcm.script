@@ -1,0 +1,19 @@
+local defaults = {
+	["enable_autocomplete"] = true,
+	["enable_debug"] = false
+}
+
+function get_config(key)
+	if ui_mcm then return ui_mcm.get("autocomplete_tasks/" .. key) else return defaults[key] end
+end
+
+function on_mcm_load()
+	return {
+		id = "autocomplete_tasks", sh = true, gr = {
+			{ id = "title", type = "slide", link = "ui_options_slider_mask", text = "ui_mcm_autocomplete_tasks_title", size = { 512, 50 }, spacing = 20 },
+			{ id = "enable_autocomplete", type = "check" , val = 1, def = true },
+			{ id = "cfg_separator", type = "line" },
+			{ id = "enable_debug", type = "check", val = 1, def = false }
+		}
+	}
+end

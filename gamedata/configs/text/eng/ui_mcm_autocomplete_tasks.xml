@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<string_table>
+	<string id="ui_mcm_menu_autocomplete_tasks">
+		<text>Autocomplete</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_title">
+		<text>Autocomplete Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_enable_autocomplete">
+		<text>Enable Autocomplete</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_enable_autocomplete_desc">
+		<text>Enables the main autocomplete logic</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_enable_debug">
+		<text>Enable debug</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_enable_debug_desc">
+		<text>Enables debug logs. Only useful for modders.</text>
+	</string>
+</string_table>
