@@ -6,4 +6,5 @@
 ## v1.1.0:
 * Renamed the project "Unofficial Autocomplete v4" to "Autocomplete Tasks"
 * Added a "PDA Check" MCM option
+* Edited language strings
 * Optimized code
