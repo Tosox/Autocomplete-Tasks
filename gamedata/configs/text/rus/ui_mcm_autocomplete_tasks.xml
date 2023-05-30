@@ -12,6 +12,12 @@
 	<string id="ui_mcm_autocomplete_tasks_enable_autocomplete_desc">
 		<text>Включает логику автоматическое завершение</text>
 	</string>
+	<string id="ui_mcm_autocomplete_tasks_pda_check">
+		<text>Включить проверку КПК</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_pda_check_desc">
+		<text>Автозавершение заданий только в том случае, если у игрока есть КПК</text>
+	</string>
 	<string id="ui_mcm_autocomplete_tasks_enable_debug">
 		<text>Включить отладочного журналов</text>
 	</string>

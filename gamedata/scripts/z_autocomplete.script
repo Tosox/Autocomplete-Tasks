@@ -4,52 +4,59 @@
 -- Add "autocomplete = true" to task config to have a task autocomplete when the stage_complete stage is reached
 
 local mcm_enable_autocomplete = true
+local mcm_pda_check = true
 local mcm_enable_debug = false
 
-function log(...)
+function dbg_printf(...)
 	if mcm_enable_debug then printf(...) end
+end
+
+function has_actor_pda()
+	return db.actor:object("device_pda_1") or db.actor:object("device_pda_2") or db.actor:object("device_pda_3") or false
 end
 
 function on_option_change()
 	mcm_enable_autocomplete = z_autocomplete_mcm.get_config("enable_autocomplete")
+	mcm_pda_check = z_autocomplete_mcm.get_config("pda_check")
 	mcm_enable_debug = z_autocomplete_mcm.get_config("enable_debug")
 end
 
 function actor_on_first_update()
 	local function check_tasks()
 		if not mcm_enable_autocomplete then return end
-	
+		if mcm_pda_check and not has_actor_pda() then return end
+
 		local tm = task_manager.get_task_manager()
 		for tid, tsk in pairs(tm.task_info) do
-			if check(tid, tsk.stage) then
-				log("Autocompleting task: %s", tid)
+			if do_autocompletion(tid, tsk.stage) then
+				dbg_printf("Autocompleting task: %s", tid)
 				tm:set_task_completed(tid)
 			end
 		end
-		
+
 		ResetTimeEvent("check_autocomplete_tasks", "check_autocomplete_tasks", 2.0)
 	end
-	
+
 	on_option_change()
 	CreateTimeEvent("check_autocomplete_tasks", "check_autocomplete_tasks", 2.0, check_tasks)
 end
 
 local _task_cache = {}
-function check(tid, stage)
+function do_autocompletion(tid, stage)
 	if not _task_cache[tid] then
-		parsed_data = utils_data.parse_ini_section_to_array(task_manager.task_ini, tid)
+		local parsed_data = utils_data.parse_ini_section_to_array(task_manager.task_ini, tid)
 		if not parsed_data then
-			log("Unable to autocomplete task: %s", tid)
+			dbg_printf("Unable to autocomplete task: %s", tid)
 		end
 		_task_cache[tid] = parsed_data or {}
 	end
-	
+
 	if not stage then return false end
 	if not _task_cache[tid].stage_complete then return false end
 	if tonumber(_task_cache[tid].stage_complete) ~= stage then return false end
 	if not _task_cache[tid].autocomplete then return false end
 	if _task_cache[tid].autocomplete ~= "true" then return false end
-	
+
 	return true
 end
 

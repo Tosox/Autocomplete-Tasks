@@ -12,10 +12,16 @@
 	<string id="ui_mcm_autocomplete_tasks_enable_autocomplete_desc">
 		<text>Enables the main autocomplete logic</text>
 	</string>
+	<string id="ui_mcm_autocomplete_tasks_pda_check">
+		<text>Enable PDA check</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_pda_check_desc">
+		<text>Only autocomplete tasks if the player has a PDA</text>
+	</string>
 	<string id="ui_mcm_autocomplete_tasks_enable_debug">
-		<text>Enable debug</text>
+		<text>Enable debug logs</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_enable_debug_desc">
-		<text>Enables debug logs. Only useful for modders.</text>
+		<text>Only useful for modders</text>
 	</string>
 </string_table>
