@@ -211,14 +211,7 @@ function task_manager.task_callback(tsk, state)
 	local tsk_id = tsk:get_id()
 
 	-- Check if task should get autocompleted
-	if not should_autocomplete(tsk_id, tsk.stage_complete) then
-		orig_task_callback(tsk, state)
-		return
-	end
-
-	-- Check if task is in last stage
-	if state ~= task.completed then
-		dbg_printf("[AT] Task %s not completed. Reached state %s", tsk_id, state)
+	if not should_autocomplete(tsk_id, tsk.stage) then
 		orig_task_callback(tsk, state)
 		return
 	end
