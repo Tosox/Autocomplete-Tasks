@@ -1,21 +1,81 @@
 local defaults = {
-	["enable_autocomplete"] = true,
-	["pda_check"] = true,
-	["enable_debug"] = false
+	["at_general/enable"] = true,
+	["at_general/pda_check"] = true,
+	["at_general/compensate_item_rewards"] = true,
+
+	["at_general_tasks/assault"] = true,
+	["at_general_tasks/bounty"] = true,
+	["at_general_tasks/fate"] = false,
+	["at_general_tasks/scripted"] = false,
+	["at_general_tasks/fetch"] = false,
+	["at_general_tasks/return"] = false,
+	["at_general_tasks/measurements"] = false,
+	["at_general_tasks/scanner"] = false,
+
+	["at_special_tasks/snitch"] = true,
+	["at_special_tasks/spring_clean"] = true,
+	["at_special_tasks/defend_pump_station"] = true,
+	["at_special_tasks/destroy_btrs"] = true,
+	["at_special_tasks/research_hunt"] = false,
+	["at_special_tasks/recover_tracker"] = false,
+
+	["at_other/whitelist"] = "none",
+	["at_other/blacklist"] = "none",
+	["at_other/debug"] = false
 }
 
-function get_config(key)
-	if ui_mcm then return ui_mcm.get("autocomplete_tasks/" .. key) else return defaults[key] end
+function get_config(module, key)
+	if ui_mcm then return ui_mcm.get("autocomplete_tasks/" .. module .. "/" .. key) else return defaults[module .. "/" .. key] end
+end
+
+function set_config(module, key, value)
+	if ui_mcm then ui_mcm.set("autocomplete_tasks/" .. module .. "/" .. key, value) end
 end
 
 function on_mcm_load()
 	return {
-		id = "autocomplete_tasks", sh = true, gr = {
-			{ id = "title", type = "slide", link = "ui_options_slider_mask", text = "ui_mcm_autocomplete_tasks_title", size = { 512, 50 }, spacing = 20 },
-			{ id = "enable_autocomplete", type = "check", val = 1, def = true },
-			{ id = "pda_check", type = "check", val = 1, def = true },
-			{ id = "cfg_separator", type = "line" },
-			{ id = "enable_debug", type = "check", val = 1, def = false }
+		id = "autocomplete_tasks", gr = {
+			{
+				id = "at_general", sh = true, gr = {
+					{ id = "title", type = "slide", link = "ui_options_slider_mask", text = "ui_mcm_menu_at_general", size = { 512, 50 }, spacing = 20 },
+					{ id = "enable", type = "check", val = 1, def = defaults["at_general/enable"] },
+					{ id = "pda_check", type = "check", val = 1, def = defaults["at_general/pda_check"] },
+					{ id = "compensate_item_rewards", type = "check", val = 1, def = defaults["at_general/compensate_item_rewards"] }
+				}
+			},
+			{
+				id = "at_general_tasks", sh = true, gr = {
+					{ id = "title", type = "slide", link = "ui_options_slider_mask", text = "ui_mcm_menu_at_general_tasks", size = { 512, 50 }, spacing = 20 },
+					{ id = "assault", type = "check", val = 1, def = defaults["at_general_tasks/assault"] },
+					{ id = "bounty", type = "check", val = 1, def = defaults["at_general_tasks/bounty"] },
+					{ id = "fate", type = "check", val = 1, def = defaults["at_general_tasks/fate"] },
+					{ id = "scripted", type = "check", val = 1, def = defaults["at_general_tasks/scripted"] },
+					{ id = "fetch", type = "check", val = 1, def = defaults["at_general_tasks/fetch"] },
+					{ id = "return", type = "check", val = 1, def = defaults["at_general_tasks/return"] },
+					{ id = "measurements", type = "check", val = 1, def = defaults["at_general_tasks/measurements"] },
+					{ id = "scanner", type = "check", val = 1, def = defaults["at_general_tasks/scanner"] }
+				}
+			},
+			{
+				id = "at_special_tasks", sh = true, gr = {
+					{ id = "title", type = "slide", link = "ui_options_slider_mask", text = "ui_mcm_menu_at_special_tasks", size = { 512, 50 }, spacing = 20 },
+					{ id = "snitch", type = "check", val = 1, def = defaults["at_special_tasks/snitch"] },
+					{ id = "spring_clean", type = "check", val = 1, def = defaults["at_special_tasks/spring_clean"] },
+					{ id = "defend_pump_station", type = "check", val = 1, def = defaults["at_special_tasks/defend_pump_station"] },
+					{ id = "destroy_btrs", type = "check", val = 1, def = defaults["at_special_tasks/destroy_btrs"] },
+					{ id = "research_hunt", type = "check", val = 1, def = defaults["at_special_tasks/research_hunt"] },
+					{ id = "recover_tracker", type = "check", val = 1, def = defaults["at_special_tasks/recover_tracker"] }
+				}
+			},
+			{
+				id = "at_other", sh = true, gr = {
+					{ id = "title", type = "slide", link = "ui_options_slider_mask", text = "ui_mcm_menu_at_other", size = { 512, 50 }, spacing = 20 },
+					{ id = "whitelist", type = "input", val = 0, def = defaults["at_other/whitelist"] },
+					{ id = "blacklist", type = "input", val = 0, def = defaults["at_other/blacklist"] },
+					{ id = "separator", type = "line" },
+					{ id = "debug", type = "check", val = 1, def = defaults["at_other/debug"] }
+				}
+			}
 		}
 	}
 end

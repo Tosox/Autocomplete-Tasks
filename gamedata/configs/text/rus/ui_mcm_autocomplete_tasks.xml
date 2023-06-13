@@ -1,27 +1,96 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <string_table>
+
 	<string id="ui_mcm_menu_autocomplete_tasks">
-		<text>Autocomplete</text>
+		<text>Авто-выполнение заданий</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_title">
-		<text>Autocomplete Tasks</text>
+
+	<string id="ui_mcm_menu_at_general">
+		<text>Общие настройки</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_enable_autocomplete">
+	<string id="ui_mcm_autocomplete_tasks_at_general_enable">
 		<text>Включить автоматическое завершение</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_enable_autocomplete_desc">
+	<string id="ui_mcm_autocomplete_tasks_at_general_enable_desc">
 		<text>Включает логику автоматическое завершение</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_pda_check">
+	<string id="ui_mcm_autocomplete_tasks_at_general_pda_check">
 		<text>Включить проверку КПК</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_pda_check_desc">
+	<string id="ui_mcm_autocomplete_tasks_at_general_pda_check_desc">
 		<text>Автозавершение заданий только в том случае, если у игрока есть КПК</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_enable_debug">
+	<string id="ui_mcm_autocomplete_tasks_at_general_compensate_item_rewards">
+		<text>Компенсировать награды за предметы</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_compensate_item_rewards_desc">
+		<text>Заменить полученные предметы на их денежный эквивалент</text>
+	</string>
+	
+	<string id="ui_mcm_menu_at_general_tasks">
+		<text>Общие задачи</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_assault">
+		<text>Задачи на штурм</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_bounty">
+		<text>Задачи на охоту</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fate">
+		<text>Задачи на судьбу</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scripted">
+		<text>Скриптовые задачи</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fetch">
+		<text>Задачи на доставку</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_return">
+		<text>Задачи на возврат</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_measurements">
+		<text>Задачи на измерения</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scanner">
+		<text>Задачи на сканирование</text>
+	</string>
+
+	<string id="ui_mcm_menu_at_special_tasks">
+		<text>Специальные задачи</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_snitch">
+		<text>Задача с информатором</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_spring_clean">
+		<text>Задача "Весенняя уборка"</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_defend_pump_station">
+		<text>Задача "Защитить насосную станцию"</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_destroy_btrs">
+		<text>Задача "Уничтожить БТРы"</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_research_hunt">
+		<text>Задача "Исследовательская охота"</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_recover_tracker">
+		<text>Задача "Восстановить трекер"</text>
+	</string>
+
+	<string id="ui_mcm_autocomplete_tasks_at_other_title">
+		<text>Другие настройки</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_other_whitelist">
+		<text>Список разрешенных</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_other_blacklist">
+	<text>Список запрещенных</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_other_debug">
 		<text>Включить отладочного журналов</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_enable_debug_desc">
+	<string id="ui_mcm_autocomplete_tasks_at_other_debug_desc">
 		<text>Полезно только для моддеров</text>
 	</string>
+
 </string_table>

@@ -1,27 +1,96 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <string_table>
+
 	<string id="ui_mcm_menu_autocomplete_tasks">
-		<text>Autocomplete</text>
-	</string>
-	<string id="ui_mcm_autocomplete_tasks_title">
 		<text>Autocomplete Tasks</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_enable_autocomplete">
+
+	<string id="ui_mcm_menu_at_general">
+		<text>General Settings</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_enable">
 		<text>Enable Autocomplete</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_enable_autocomplete_desc">
+	<string id="ui_mcm_autocomplete_tasks_at_general_enable_desc">
 		<text>Enables the main autocomplete logic</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_pda_check">
+	<string id="ui_mcm_autocomplete_tasks_at_general_pda_check">
 		<text>Enable PDA check</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_pda_check_desc">
+	<string id="ui_mcm_autocomplete_tasks_at_general_pda_check_desc">
 		<text>Only autocomplete tasks if the player has a PDA</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_enable_debug">
+	<string id="ui_mcm_autocomplete_tasks_at_general_compensate_item_rewards">
+		<text>Compensate item rewards</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_compensate_item_rewards_desc">
+		<text>Replaces any received items with their money equivalent</text>
+	</string>
+	
+	<string id="ui_mcm_menu_at_general_tasks">
+		<text>General Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_assault">
+		<text>Assault Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_bounty">
+		<text>Bounty Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fate">
+		<text>Fate Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scripted">
+		<text>Scripted Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fetch">
+		<text>Fetch Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_return">
+		<text>Return Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_measurements">
+		<text>Measurements Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scanner">
+		<text>Scanner Tasks</text>
+	</string>
+	
+	<string id="ui_mcm_menu_at_special_tasks">
+		<text>Special Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_snitch">
+		<text>Snitch Task</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_spring_clean">
+		<text>Spring Clean Task</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_defend_pump_station">
+		<text>Defend Pump Station Task</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_destroy_btrs">
+		<text>Destroy BTRs Task</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_research_hunt">
+		<text>Research Hunt Task</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_recover_tracker">
+		<text>Recover Tracker Task</text>
+	</string>
+	
+	<string id="ui_mcm_menu_at_other">
+		<text>Other Settings</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_other_whitelist">
+		<text>Whitelist</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_other_blacklist">
+		<text>Blacklist</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_other_debug">
 		<text>Enable debug logs</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_enable_debug_desc">
+	<string id="ui_mcm_autocomplete_tasks_at_other_debug_desc">
 		<text>Only useful for modders</text>
 	</string>
+
 </string_table>

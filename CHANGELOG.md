@@ -8,3 +8,10 @@
 * Added a "PDA Check" MCM option
 * Edited language strings
 * Optimized code
+
+## v2.0.0:
+* No longer requires Modded Exes (for now)
+* Added MCM options for different task categories
+* Added a "Compensate Item Rewards" MCM option
+* Added Milspec PDA to "PDA Check"
+* Edited MCM options localization
