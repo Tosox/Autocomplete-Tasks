@@ -14,4 +14,4 @@
 * Added MCM options for different task categories
 * Added a "Compensate Item Rewards" MCM option
 * Added Milspec PDA to "PDA Check"
-* Edited MCM options localization
+* Edited language strings

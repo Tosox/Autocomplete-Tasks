@@ -26,6 +26,12 @@
 	<string id="ui_mcm_autocomplete_tasks_at_general_compensate_item_rewards_desc">
 		<text>Replaces any received items with their money equivalent</text>
 	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_compensation_coefficient">
+		<text>Compensation Coefficient</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_compensation_coefficient_desc">
+		<text>1.0 - The base cost of the item</text>
+	</string>
 	
 	<string id="ui_mcm_menu_at_general_tasks">
 		<text>General Tasks</text>
@@ -49,32 +55,32 @@
 		<text>Return Tasks</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_measurements">
-		<text>Measurements Tasks</text>
+		<text>Take Measurements Tasks</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scanner">
-		<text>Scanner Tasks</text>
+		<text>Place Scanner Tasks</text>
 	</string>
 	
 	<string id="ui_mcm_menu_at_special_tasks">
 		<text>Special Tasks</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_snitch">
-		<text>Snitch Task</text>
+		<text>Task "Toppers"</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_spring_clean">
-		<text>Spring Clean Task</text>
+		<text>Task "Secure The Base"</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_defend_pump_station">
-		<text>Defend Pump Station Task</text>
+		<text>Task "Defend the pump station"</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_destroy_btrs">
-		<text>Destroy BTRs Task</text>
+		<text>Task "Why We Can't Have Nice Things"</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_research_hunt">
-		<text>Research Hunt Task</text>
+		<text>Task "Semenov Research Hunt"</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_special_tasks_recover_tracker">
-		<text>Recover Tracker Task</text>
+		<text>Task "Recover the Tracking Device"</text>
 	</string>
 	
 	<string id="ui_mcm_menu_at_other">

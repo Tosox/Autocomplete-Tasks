@@ -6,6 +6,7 @@
 local global_enable = nil
 local pda_check = nil
 local compensate_item_rewards = nil
+local compensation_coefficient = nil
 
 local assault_enable = nil
 local bounty_enable = nil
@@ -165,6 +166,7 @@ function on_option_change()
 	global_enable = z_autocomplete_mcm.get_config("at_general", "enable")
 	pda_check = z_autocomplete_mcm.get_config("at_general", "pda_check")
 	compensate_item_rewards = z_autocomplete_mcm.get_config("at_general", "compensate_item_rewards")
+	compensation_coefficient = z_autocomplete_mcm.get_config("at_general", "compensation_coefficient")
 
 	-- General tasks options
 	assault_enable = z_autocomplete_mcm.get_config("at_general_tasks", "assault")
@@ -248,6 +250,8 @@ function task_manager.task_callback(tsk, state)
 				for i, itm in pairs(attr[3]) do
 					-- Define lowest and highest bonus price
 					local itm_cost = ini_sys:r_float(itm, "cost") or 500
+					itm_cost = itm_cost * compensation_coefficient
+
 					if itm_cost > highest_price then
 						highest_price = itm_cost
 					end
