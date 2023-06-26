@@ -21,3 +21,8 @@
 
 ## v2.0.2:
 * Fixed release v2.0.1
+
+## v2.0.3:
+* Changed the default value of the coefficient of "Compensate item rewards"
+* Fixed compensation for multi use items with a defined amount
+* Optimized code
