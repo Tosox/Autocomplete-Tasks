@@ -2,7 +2,7 @@ local defaults = {
 	["at_general/enable"] = true,
 	["at_general/pda_check"] = true,
 	["at_general/compensate_item_rewards"] = true,
-	["at_general/compensation_coefficient"] = 1.0,
+	["at_general/compensation_coefficient"] = 0.7,
 
 	["at_general_tasks/assault"] = true,
 	["at_general_tasks/bounty"] = true,
