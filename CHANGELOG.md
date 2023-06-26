@@ -15,3 +15,9 @@
 * Added a "Compensate Item Rewards" MCM option
 * Added Milspec PDA to "PDA Check"
 * Edited language strings
+
+## v2.0.1:
+* Fixed index a nil value
+
+## v2.0.2:
+* Fixed release v2.0.1
