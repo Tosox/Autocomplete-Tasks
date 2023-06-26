@@ -259,9 +259,9 @@ function task_manager.task_callback(tsk, state)
 
 					-- Check if item is a multiuse item with a defined amount
 					if itm_amount then
-    					local max_uses = ini_sys:r_float(itm_name, "max_uses") or itm_amount
-    					itm_cost = ini_sys:r_float(itm_name, "cost") or 1000
-    					itm_cost = itm_cost * (itm_amount / max_uses)
+						local max_uses = ini_sys:r_float(itm_name, "max_uses") or itm_amount
+						itm_cost = ini_sys:r_float(itm_name, "cost") or 1000
+						itm_cost = itm_cost * (itm_amount / max_uses)
 					else
 						itm_cost = ini_sys:r_float(itm, "cost") or 500
 					end
