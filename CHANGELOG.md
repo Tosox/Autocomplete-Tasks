@@ -26,3 +26,6 @@
 * Changed the default value of the coefficient of "Compensate item rewards"
 * Fixed compensation for multi use items with a defined amount
 * Optimized code
+
+## v2.0.4:
+* Fixed item compensation not working for special cases

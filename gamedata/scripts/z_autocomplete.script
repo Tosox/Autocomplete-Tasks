@@ -251,7 +251,7 @@ function task_manager.task_callback(tsk, state)
 
 		if attr and attr[1] and attr[3] then
 			-- Nil checks
-			if attr[1] == "reward_random_item" then
+			if (attr[1] == "reward_random_item") or (attr[1] == "reward_item") then
 				-- Check if on_complete property has a reward_random_item attribute
 				for i, itm in pairs(attr[3]) do
 					local itm_cost = 0
@@ -283,7 +283,7 @@ function task_manager.task_callback(tsk, state)
 					end
 				end
 
-				-- Overwrite reward_random_item section
+				-- Overwrite reward_random_item/reward_item section
 				dbg_printf("[AT] Compensate items with min reward %s and max reward %s", lowest_price, highest_price)
 				attr[1] = "reward_random_money"
 				attr[3][1] = lowest_price
