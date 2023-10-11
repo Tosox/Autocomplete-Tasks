@@ -23,7 +23,7 @@ Since [AeneasH's](https://www.moddb.com/members/aeneash) [Autocomplete Unofficia
 1. Get the ID of the task. It should look something like this: bar_visitors_barman_stalker_trader_task_2. You can find all vanilla tasks defined in this directory after unpacking the game files: gamedata/configs/misc/task/tm_\*.ltx
 2. If you only know the name of the task you can check gamedata/configs/text/[eng/rus]/st_quests_\*.xml and search for the name of the task
 3. Next, copy the text above the title in the quotation marks without "_name" from the end. Now you have the task ID
-4. Paste the task ID in the whitelist/blacklist input field in the MCM settings (Autcomplete Tasks -> Other).  Make sure to separate multiple ids with a comma (",").
+4. Paste the task ID in the whitelist/blacklist input field in the MCM settings (Autocomplete Tasks -> Other).  Make sure to separate multiple ids with a comma (",").
 5. Apply the changes
 
 ## Preview
