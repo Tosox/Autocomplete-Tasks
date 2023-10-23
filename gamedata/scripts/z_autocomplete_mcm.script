@@ -2,7 +2,7 @@ local defaults = {
 	["at_general/enable"] = true,
 	["at_general/pda_check"] = true,
 	["at_general/compensate_item_rewards"] = true,
-	["at_general/compensation_coefficient"] = 0.7,
+	["at_general/compensation_coefficient"] = 0.4,
 
 	["at_general_tasks/assault"] = true,
 	["at_general_tasks/bounty"] = true,
@@ -20,6 +20,9 @@ local defaults = {
 	["at_special_tasks/research_hunt"] = false,
 	["at_special_tasks/recover_tracker"] = false,
 
+	["at_other/check_interval"] = 2.0,
+	["at_other/finish_message_delay"] = 4.0,
+	["at_other/reward_delay"] = 3.0,
 	["at_other/whitelist"] = "none",
 	["at_other/blacklist"] = "none",
 	["at_other/debug"] = false
@@ -68,9 +71,13 @@ function on_mcm_load()
 			{
 				id = "at_other", sh = true, gr = {
 					{ id = "title", type = "slide", link = "ui_options_slider_mask", text = "ui_mcm_menu_at_other", size = { 512, 50 }, spacing = 20 },
+					{ id = "check_interval", type = "track", val = 2, min = 0.0, max = 10.0, step = 0.1, def = defaults["at_other/check_interval"] },
+					{ id = "finish_message_delay", type = "track", val = 2, min = 0.0, max = 30.0, step = 0.5, def = defaults["at_other/finish_message_delay"] },
+					{ id = "reward_delay", type = "track", val = 2, min = 0.0, max = 30.0, step = 0.5, def = defaults["at_other/reward_delay"] },
+					{ id = "separator1", type = "line" },
 					{ id = "whitelist", type = "input", val = 0, def = defaults["at_other/whitelist"] },
 					{ id = "blacklist", type = "input", val = 0, def = defaults["at_other/blacklist"] },
-					{ id = "separator", type = "line" },
+					{ id = "separator2", type = "line" },
 					{ id = "debug", type = "check", val = 1, def = defaults["at_other/debug"] }
 				}
 			}

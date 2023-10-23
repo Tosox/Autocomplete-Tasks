@@ -86,6 +86,15 @@
 	<string id="ui_mcm_menu_at_other">
 		<text>Другие настройки</text>
 	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_other_check_interval">
+		<text>Интервал проверки авто-выполнение</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_other_finish_message_delay">
+		<text>Задержка сообщения о выдаче задания</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_other_reward_delay">
+		<text>Задержка вознаграждения</text>
+	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_other_whitelist">
 		<text>белый список</text>
 	</string>

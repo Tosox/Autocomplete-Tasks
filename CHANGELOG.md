@@ -29,3 +29,9 @@
 
 ## v2.0.4:
 * Fixed item compensation not working for special cases
+
+## v2.1.0:
+* Receive a message from the task giver after completing the task
+* Lowered default item compensation coefficient
+* Customizable autocomplete check interval and more in the MCM settings
+* Fixed a CTD when compensating item rewards
