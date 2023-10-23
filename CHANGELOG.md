@@ -32,6 +32,7 @@
 
 ## v2.1.0:
 * Receive a message from the task giver after completing the task
+* All money rewards after item compensation come in one single money reward
 * Lowered default item compensation coefficient
 * Customizable autocomplete check interval and more in the MCM settings
 * Fixed a CTD when compensating item rewards
