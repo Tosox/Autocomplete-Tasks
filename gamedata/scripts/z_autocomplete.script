@@ -155,8 +155,8 @@ function send_confirmation_message(tid, sender_id)
 	end
 
 	xr_sound.set_sound_play(AC_ID, "pda_tips")
-	local sender_title = string.format("%s, %s", sender_obj:character_name(), game.translate_string(sender_obj:community()))
-	db.actor:give_game_news(sender_title, game.translate_string(finish_message), sender_obj:character_icon(), 0, 5000, 0)
+	local message_title = string.format("%s, %s", sender_obj:character_name(), game.translate_string(sender_obj:community()))
+	db.actor:give_game_news(message_title, game.translate_string(finish_message), sender_obj:character_icon(), 0, 5000, 0)
 end
 
 function is_listed(list, tid)
