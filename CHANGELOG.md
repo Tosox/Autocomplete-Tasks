@@ -36,3 +36,8 @@
 * Lowered default item compensation coefficient
 * Customizable autocomplete check interval and more in the MCM settings
 * Fixed a CTD when compensating item rewards
+
+## v2.1.1:
+* Fixed a CTD when sending the task finish message
+* Fixed rare 0 money rewards
+* Added task "esc_2_12_stalker_wolf_task_3" to the blacklist by default
