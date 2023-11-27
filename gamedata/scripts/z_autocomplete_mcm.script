@@ -24,7 +24,7 @@ local defaults = {
 	["at_other/finish_message_delay"] = 4.0,
 	["at_other/reward_delay"] = 3.0,
 	["at_other/whitelist"] = "none",
-	["at_other/blacklist"] = "none",
+	["at_other/blacklist"] = "esc_2_12_stalker_wolf_task_3,",
 	["at_other/debug"] = false
 }
 
