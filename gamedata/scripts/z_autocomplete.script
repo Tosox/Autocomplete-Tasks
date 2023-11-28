@@ -154,10 +154,16 @@ function send_confirmation_message(tid, sender_id)
 		return
 	end
 
-	-- Temporary fix
-	if not sender_obj.character_name then
-		dbg_printf("[AT] Couldn't send confirmation message: task giver object is incomplete")
-		return
+	-- Check if task giver is a squad
+	-- Note: the task giver id for the toolkit fetch tasks by technicians is the id of a squad for some reason
+	if sender_obj:clsid() == clsid.online_offline_group_s then
+		local commander_obj = alife_object(sender_obj:commander_id())
+		if not commander_obj then
+			dbg_printf("[AT] Couldn't send confirmation message: task giver is an invalid squad")
+			return
+		end
+
+		sender_obj = commander_obj
 	end
 
 	xr_sound.set_sound_play(AC_ID, "pda_tips")
