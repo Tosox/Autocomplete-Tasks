@@ -40,4 +40,5 @@
 ## v2.1.1:
 * Fixed a CTD when sending the task finish message
 * Fixed rare 0 money rewards
+* Fixed deletion of on_complete instructions with no arguments
 * Added task "esc_2_12_stalker_wolf_task_3" to the blacklist by default
