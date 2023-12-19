@@ -150,7 +150,7 @@ function send_confirmation_message(tid, sender_id)
 	-- Check if task giver is valid
 	local sender_obj = alife_object(sender_id)
 	if not sender_obj then
-		dbg_printf("[AT] Couldn't send confirmation message: task giver is invalid")
+		dbg_printf("[AT] Couldn't send confirmation message: task giver is nil")
 		return
 	end
 
@@ -164,6 +164,12 @@ function send_confirmation_message(tid, sender_id)
 		end
 
 		sender_obj = commander_obj
+	end
+	
+	-- Still check if valid
+	if (not sender_obj.character_name) or (not sender_obj.community) or (not sender_obj.character_icon) then
+		dbg_printf("[AT] Couldn't send confirmation message: task giver is invalid with clsid %s", sender_obj.clsid and sender_obj:clsid())
+		return
 	end
 
 	xr_sound.set_sound_play(AC_ID, "pda_tips")
