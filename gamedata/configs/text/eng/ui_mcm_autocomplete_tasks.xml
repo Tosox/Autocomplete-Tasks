@@ -51,8 +51,8 @@
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fetch">
 		<text>Fetch Tasks</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_return">
-		<text>Return Tasks</text>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_retrieve">
+		<text>Retrieve Tasks</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_measurements">
 		<text>Take Measurements Tasks</text>

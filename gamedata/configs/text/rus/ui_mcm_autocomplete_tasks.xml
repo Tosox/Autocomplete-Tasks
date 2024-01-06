@@ -51,7 +51,7 @@
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fetch">
 		<text>Получение задачи</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_return">
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_retrieve">
 		<text>Задачи возврата</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_measurements">
