@@ -19,7 +19,7 @@ local bounty_enable = nil
 local fate_enable = nil
 local scripted_enable = nil
 local fetch_enable = nil
-local return_enable = nil
+local retrieve_enable = nil
 local measurements_enable = nil
 local scanner_enable = nil
 
@@ -77,9 +77,9 @@ function should_complete_by_task_functor(task_functor_name)
 		or task_functor_name == "multifetch_target_functor"
 		then return fetch_enable end
 
-	-- Check return task
+	-- Check retrieve task
 	if task_functor_name == "drx_sl_quest_item_task_target"
-		then return return_enable end
+		then return retrieve_enable end
 
 	-- Check measurements task
 	if task_functor_name == "general_measure"
@@ -242,7 +242,7 @@ function on_option_change()
 	scripted_enable = z_autocomplete_mcm.get_config("at_general_tasks", "scripted")
 	scanner_enable = z_autocomplete_mcm.get_config("at_general_tasks", "scanner")
 	fetch_enable = z_autocomplete_mcm.get_config("at_general_tasks", "fetch")
-	return_enable = z_autocomplete_mcm.get_config("at_general_tasks", "return")
+	retrieve_enable = z_autocomplete_mcm.get_config("at_general_tasks", "retrieve")
 
 	-- Special tasks options
 	snitch_enable = z_autocomplete_mcm.get_config("at_special_tasks", "snitch")

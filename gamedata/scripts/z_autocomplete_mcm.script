@@ -9,7 +9,7 @@ local defaults = {
 	["at_general_tasks/fate"] = false,
 	["at_general_tasks/scripted"] = false,
 	["at_general_tasks/fetch"] = false,
-	["at_general_tasks/return"] = false,
+	["at_general_tasks/retrieve"] = false,
 	["at_general_tasks/measurements"] = false,
 	["at_general_tasks/scanner"] = false,
 
@@ -52,7 +52,7 @@ function on_mcm_load()
 					{ id = "fate", type = "check", val = 1, def = defaults["at_general_tasks/fate"] },
 					{ id = "scripted", type = "check", val = 1, def = defaults["at_general_tasks/scripted"] },
 					{ id = "fetch", type = "check", val = 1, def = defaults["at_general_tasks/fetch"] },
-					{ id = "return", type = "check", val = 1, def = defaults["at_general_tasks/return"] },
+					{ id = "retrieve", type = "check", val = 1, def = defaults["at_general_tasks/retrieve"] },
 					{ id = "measurements", type = "check", val = 1, def = defaults["at_general_tasks/measurements"] },
 					{ id = "scanner", type = "check", val = 1, def = defaults["at_general_tasks/scanner"] }
 				}
