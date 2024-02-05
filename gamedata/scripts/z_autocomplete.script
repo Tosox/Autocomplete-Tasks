@@ -3,8 +3,8 @@
 -- For Anomaly 1.5 Update 4 Hotfix 8.1 (19-12-05)
 
 local CHECK_INTERVAL = 2.0
-local FINISH_MESSAGE_DELAY = 4.0
-local REWARD_DELAY = 3.0
+local FINISH_MESSAGE_DELAY = 3.0
+local REWARD_DELAY = 2.0
 
 local global_enable = nil
 local pda_check = nil
@@ -115,30 +115,36 @@ function do_autocompletion()
 	local tm = task_manager.get_task_manager()
 	for tid, tsk in pairs(tm.task_info) do
 		-- Proceed to check if task is not queued for completion yet
-		if not _finished_task_cache[tid] then
-			-- Complete task if the check returns true
-			if should_autocomplete(tid, tsk.stage) then
-				dbg_printf("[AT] Autocompleting task: %s", tid)
-				_finished_task_cache[tid] = true
-			
-				CreateTimeEvent("autocomplete_tasks", "finish_message_delay_" .. tid, FINISH_MESSAGE_DELAY, function()
-					-- Send finish task dialog message from task giver
-					send_confirmation_message(tid, tsk.task_giver_id)
-
-					CreateTimeEvent("autocomplete_tasks", "reward_delay_" .. tid, REWARD_DELAY, function()
-						-- Complete task
-						tm:set_task_completed(tid)
-
-						-- Remove task from queue
-						_finished_task_cache[tid] = nil
-
-						return true
-					end)
-
-					return true
-				end)
-			end
+		if _finished_task_cache[tid] then
+			goto continue
 		end
+
+		-- Complete task if the check returns true
+		if not should_autocomplete(tid, tsk.stage) then
+			goto continue
+		end
+
+		dbg_printf("[AT] Autocompleting task: %s", tid)
+		_finished_task_cache[tid] = true
+
+		-- Send finish task dialog message from task giver
+		CreateTimeEvent("autocomplete_tasks", "finish_message_delay_" .. tid, FINISH_MESSAGE_DELAY, function()
+			send_confirmation_message(tid, tsk.task_giver_id)
+
+			CreateTimeEvent("autocomplete_tasks", "reward_delay_" .. tid, REWARD_DELAY, function()
+				-- Complete task
+				tm:set_task_completed(tid)
+
+				-- Remove task from queue
+				_finished_task_cache[tid] = nil
+
+				return true
+			end)
+
+			return true
+		end)
+
+		:: continue ::
 	end
 end
 
@@ -168,7 +174,7 @@ function send_confirmation_message(tid, sender_id)
 
 		sender_obj = commander_obj
 	end
-	
+
 	-- Still check if valid
 	if (not sender_obj.character_name) or (not sender_obj.community) or (not sender_obj.character_icon) then
 		dbg_printf("[AT] Couldn't send confirmation message: task giver is invalid with clsid %s", sender_obj.clsid and sender_obj:clsid())
@@ -231,7 +237,7 @@ end
 
 
 function on_option_change()
-	-- General options 
+	-- General options
 	global_enable = z_autocomplete_mcm.get_config("at_general", "enable")
 	pda_check = z_autocomplete_mcm.get_config("at_general", "pda_check")
 	compensate_item_rewards = z_autocomplete_mcm.get_config("at_general", "compensate_item_rewards")
