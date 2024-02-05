@@ -2,12 +2,9 @@
 -- Autocomplete v3 (20-01-08)
 -- For Anomaly 1.5 Update 4 Hotfix 8.1 (19-12-05)
 
-valid_pda_devices = {
-	["device_pda_1"] = true,
-	["device_pda_2"] = true,
-	["device_pda_3"] = true,
-	["device_pda_milspec"] = true
-}
+local CHECK_INTERVAL = 2.0
+local FINISH_MESSAGE_DELAY = 4.0
+local REWARD_DELAY = 3.0
 
 local global_enable = nil
 local pda_check = nil
@@ -30,9 +27,6 @@ local destroy_btrs_enable = nil
 local research_hunt_enable = nil
 local recover_tracker_enable = nil
 
-local check_interval = nil
-local finish_message_delay = nil
-local reward_delay = nil
 local whitelist = nil
 local blacklist = nil
 local _dbg = nil
@@ -45,13 +39,22 @@ function dbg_printf(...)
 	if _dbg then printf(...) end
 end
 
-function has_actor_pda()
-	for k, v in pairs(valid_pda_devices) do
-		if (db.actor:object(k) and true) and (v) then
-			return true
-		end
+-- TODO: Check that this doesn't include looted PDAs
+function IsPDA(o, c)
+	if not (c) then
+		c = o and o:clsid()
 	end
-	return false
+	return c and (c == clsid.obj_pda_s or c == clsid.device_pda)
+end
+
+function has_actor_pda()
+	local has_pda = false
+	db.actor:iterate_inventory(function(owner, itm)
+		if (not has_pda) and (IsPDA(itm)) then
+			has_pda = true
+		end
+	end, db.actor)
+	return has_pda
 end
 
 function should_complete_by_task_functor(task_functor_name)
@@ -118,11 +121,11 @@ function do_autocompletion()
 				dbg_printf("[AT] Autocompleting task: %s", tid)
 				_finished_task_cache[tid] = true
 			
-				CreateTimeEvent("autocomplete_tasks", "finish_message_delay", finish_message_delay, function()
+				CreateTimeEvent("autocomplete_tasks", "finish_message_delay_" .. tid, FINISH_MESSAGE_DELAY, function()
 					-- Send finish task dialog message from task giver
 					send_confirmation_message(tid, tsk.task_giver_id)
 
-					CreateTimeEvent("autocomplete_tasks", "reward_delay", reward_delay, function()
+					CreateTimeEvent("autocomplete_tasks", "reward_delay_" .. tid, REWARD_DELAY, function()
 						-- Complete task
 						tm:set_task_completed(tid)
 
@@ -253,27 +256,24 @@ function on_option_change()
 	recover_tracker_enable = z_autocomplete_mcm.get_config("at_special_tasks", "recover_tracker")
 
 	-- Other options
-	check_interval = z_autocomplete_mcm.get_config("at_other", "check_interval")
-	finish_message_delay = z_autocomplete_mcm.get_config("at_other", "finish_message_delay")
-	reward_delay = z_autocomplete_mcm.get_config("at_other", "reward_delay")
 	whitelist = z_autocomplete_mcm.get_config("at_other", "whitelist")
 	blacklist = z_autocomplete_mcm.get_config("at_other", "blacklist")
 	_dbg = z_autocomplete_mcm.get_config("at_other", "debug")
 end
 
 function actor_on_first_update()
-	-- Run the check every 'check_interval' seconds
-	CreateTimeEvent("autocomplete_tasks", "check_autocomplete_tasks", check_interval, function()
+	-- Run the check every 'CHECK_INTERVAL' seconds
+	CreateTimeEvent("autocomplete_tasks", "check_autocomplete_tasks", CHECK_INTERVAL, function()
 		do_autocompletion()
-		ResetTimeEvent("autocomplete_tasks", "check_autocomplete_tasks", check_interval)
+		ResetTimeEvent("autocomplete_tasks", "check_autocomplete_tasks", CHECK_INTERVAL)
 		return false
 	end)
 end
 
 function on_game_start()
-	on_option_change()
 	RegisterScriptCallback("on_option_change", on_option_change)
 	RegisterScriptCallback("actor_on_first_update", actor_on_first_update)
+	on_option_change()
 end
 
 local orig_task_callback = task_manager.task_callback
@@ -325,50 +325,54 @@ function task_manager.task_callback(tsk, state)
 		-- attr[2] - ? (number)
 		-- attr[3] - attribute arguments (table)
 
-		if (attrs) and (attrs[1]) and (attrs[2]) then
-			-- Save the unknown variable just in case
-			if not temp_unknown_attr2 then
-				temp_unknown_attr2 = attrs[2]
-			end
-
-			local attr_name = attrs[1]
-			local attr_args = attrs[3]
-
-			if attr_name == "reward_money" then
-				local money = tonumber(attr_args[1])
-				lowest_reward = lowest_reward + money
-				highest_reward = highest_reward + money
-			elseif attr_name == "reward_random_money" then
-				local money_min = tonumber(attr_args[1])
-				local money_max = tonumber(attr_args[2])
-				lowest_reward = lowest_reward + money_min
-				highest_reward = highest_reward + money_max
-			elseif attr_name == "reward_item" then
-				local item_cost = get_base_cost(attr_args[1]) * get_item_cost_modifier()
-				lowest_reward = lowest_reward + item_cost
-				highest_reward = highest_reward + item_cost
-			elseif attr_name == "reward_random_item" then
-				local lowest_price = math.huge
-				local highest_price = -math.huge
-
-				for _, item in pairs(attr_args) do
-					local item_cost = get_base_cost(item) * get_item_cost_modifier()
-
-					-- Define lowest and highest bonus price
-					if item_cost > highest_price then
-						highest_price = item_cost
-					end
-					if item_cost < lowest_price then
-						lowest_price = item_cost
-					end
-				end
-
-				lowest_reward = lowest_reward + lowest_price
-				highest_reward = highest_reward + highest_price
-			else
-				table.insert(new_on_complete, attrs)
-			end
+		if not ((attrs) and (attrs[1]) and (attrs[2])) then
+			goto continue
 		end
+
+		-- Save the unknown variable just in case
+		if not temp_unknown_attr2 then
+			temp_unknown_attr2 = attrs[2]
+		end
+
+		local attr_name = attrs[1]
+		local attr_args = attrs[3]
+
+		if attr_name == "reward_money" then
+			local money = tonumber(attr_args[1])
+			lowest_reward = lowest_reward + money
+			highest_reward = highest_reward + money
+		elseif attr_name == "reward_random_money" then
+			local money_min = tonumber(attr_args[1])
+			local money_max = tonumber(attr_args[2])
+			lowest_reward = lowest_reward + money_min
+			highest_reward = highest_reward + money_max
+		elseif attr_name == "reward_item" then
+			local item_cost = get_base_cost(attr_args[1]) * get_item_cost_modifier()
+			lowest_reward = lowest_reward + item_cost
+			highest_reward = highest_reward + item_cost
+		elseif attr_name == "reward_random_item" then
+			local lowest_price = math.huge
+			local highest_price = -math.huge
+
+			for _, item in pairs(attr_args) do
+				local item_cost = get_base_cost(item) * get_item_cost_modifier()
+
+				-- Define lowest and highest bonus price
+				if item_cost > highest_price then
+					highest_price = item_cost
+				end
+				if item_cost < lowest_price then
+					lowest_price = item_cost
+				end
+			end
+
+			lowest_reward = lowest_reward + lowest_price
+			highest_reward = highest_reward + highest_price
+		else
+			table.insert(new_on_complete, attrs)
+		end
+
+		:: continue ::
 	end
 
 	-- Add total money reward to table copy if compensation exists
@@ -400,7 +404,7 @@ function get_base_cost(item)
 	local item_name, item_amount = string.match(item, "(.*)__([1-9])")
 
 	-- Check if item is a multiuse item with a defined amount
-	if item_name then
+	if item_amount then
 		local max_uses = ini_sys:r_float(item_name, "max_uses") or item_amount
 		local item_cost = ini_sys:r_float(item_name, "cost") or 1000
 		return item_cost * (item_amount / max_uses)
