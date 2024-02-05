@@ -86,15 +86,6 @@
 	<string id="ui_mcm_menu_at_other">
 		<text>Other Settings</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_at_other_check_interval">
-		<text>Autocomplete check interval</text>
-	</string>
-	<string id="ui_mcm_autocomplete_tasks_at_other_finish_message_delay">
-		<text>Task giver message delay</text>
-	</string>
-	<string id="ui_mcm_autocomplete_tasks_at_other_reward_delay">
-		<text>Reward delay</text>
-	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_other_whitelist">
 		<text>Whitelist</text>
 	</string>
