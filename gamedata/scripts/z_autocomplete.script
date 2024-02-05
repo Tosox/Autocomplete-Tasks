@@ -114,8 +114,8 @@ function do_autocompletion()
 		end
 
 		dbg_printf("[AT] Autocompleting task: %s", tid)
-		send_confirmation_message(task_id, task_giver_id)
-		tm:set_task_completed(_task_id)
+		send_confirmation_message(tid, tsk.task_giver_id)
+		tm:set_task_completed(tid)
 
 		:: continue ::
 	end
