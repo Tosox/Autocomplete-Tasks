@@ -4,7 +4,7 @@
 
 local CHECK_INTERVAL = 2.0
 local FINISH_MESSAGE_DELAY = 3.0
-local REWARD_DELAY = 2.0
+local REWARD_DELAY = 3.0
 
 local global_enable = nil
 local pda_check = nil
@@ -410,7 +410,7 @@ function get_base_cost(item)
 	local item_name, item_amount = string.match(item, "(.*)__([1-9])")
 
 	-- Check if item is a multiuse item with a defined amount
-	if item_amount then
+	if item_name then
 		local max_uses = ini_sys:r_float(item_name, "max_uses") or item_amount
 		local item_cost = ini_sys:r_float(item_name, "cost") or 1000
 		return item_cost * (item_amount / max_uses)
