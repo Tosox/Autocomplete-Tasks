@@ -2,6 +2,13 @@
 -- Autocomplete v3 (20-01-08)
 -- For Anomaly 1.5 Update 4 Hotfix 8.1 (19-12-05)
 
+valid_pda_devices = {
+	["device_pda_1"] = true,
+	["device_pda_2"] = true,
+	["device_pda_3"] = true,
+	["device_pda_milspec"] = true
+}
+
 local CHECK_INTERVAL = 2.0
 local FINISH_MESSAGE_DELAY = 3.0
 local REWARD_DELAY = 3.0
@@ -39,22 +46,13 @@ function dbg_printf(...)
 	if _dbg then printf(...) end
 end
 
--- TODO: Check that this doesn't include looted PDAs
-function IsPDA(o, c)
-	if not (c) then
-		c = o and o:clsid()
-	end
-	return c and (c == clsid.obj_pda_s or c == clsid.device_pda)
-end
-
 function has_actor_pda()
-	local has_pda = false
-	db.actor:iterate_inventory(function(owner, itm)
-		if (not has_pda) and (IsPDA(itm)) then
-			has_pda = true
+	for k, v in pairs(valid_pda_devices) do
+		if (db.actor:object(k)) and (v) then
+			return true
 		end
-	end, db.actor)
-	return has_pda
+	end
+	return false
 end
 
 function should_complete_by_task_functor(task_functor_name)
