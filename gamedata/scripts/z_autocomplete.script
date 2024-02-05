@@ -10,8 +10,6 @@ valid_pda_devices = {
 }
 
 local CHECK_INTERVAL = 2.0
-local FINISH_MESSAGE_DELAY = 3.0
-local REWARD_DELAY = 3.0
 
 local global_enable = nil
 local pda_check = nil
@@ -39,8 +37,6 @@ local blacklist = nil
 local _dbg = nil
 
 local _task_cache = {}
-local _finished_task_cache = {}
-
 
 function dbg_printf(...)
 	if _dbg then printf(...) end
@@ -112,35 +108,14 @@ function do_autocompletion()
 	-- Interate tasks
 	local tm = task_manager.get_task_manager()
 	for tid, tsk in pairs(tm.task_info) do
-		-- Proceed to check if task is not queued for completion yet
-		if _finished_task_cache[tid] then
-			goto continue
-		end
-
 		-- Complete task if the check returns true
 		if not should_autocomplete(tid, tsk.stage) then
 			goto continue
 		end
 
 		dbg_printf("[AT] Autocompleting task: %s", tid)
-		_finished_task_cache[tid] = true
-
-		-- Send finish task dialog message from task giver
-		CreateTimeEvent("autocomplete_tasks", "finish_message_delay_" .. tid, FINISH_MESSAGE_DELAY, function()
-			send_confirmation_message(tid, tsk.task_giver_id)
-
-			CreateTimeEvent("autocomplete_tasks", "reward_delay_" .. tid, REWARD_DELAY, function()
-				-- Complete task
-				tm:set_task_completed(tid)
-
-				-- Remove task from queue
-				_finished_task_cache[tid] = nil
-
-				return true
-			end)
-
-			return true
-		end)
+		send_confirmation_message(task_id, task_giver_id)
+		tm:set_task_completed(_task_id)
 
 		:: continue ::
 	end
