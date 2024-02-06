@@ -2,6 +2,8 @@
 -- Autocomplete v3 (20-01-08)
 -- For Anomaly 1.5 Update 4 Hotfix 8.1 (19-12-05)
 
+local ini_trade = ini_file([[items\trade\trade_generic.ltx]])
+
 valid_pda_devices = {
 	["device_pda_1"] = true,
 	["device_pda_2"] = true,
@@ -326,7 +328,7 @@ function task_manager.task_callback(tsk, state)
 			lowest_reward = lowest_reward + money_min
 			highest_reward = highest_reward + money_max
 		elseif attr_name == "reward_item" then
-			local item_cost = get_base_cost(attr_args[1]) * get_item_cost_modifier()
+			local item_cost = get_base_cost(attr_args[1]) * get_sell_discount() * compensation_coefficient
 			lowest_reward = lowest_reward + item_cost
 			highest_reward = highest_reward + item_cost
 		elseif attr_name == "reward_random_item" then
@@ -334,7 +336,7 @@ function task_manager.task_callback(tsk, state)
 			local highest_price = -math.huge
 
 			for _, item in pairs(attr_args) do
-				local item_cost = get_base_cost(item) * get_item_cost_modifier()
+				local item_cost = get_base_cost(item) * get_sell_discount() * compensation_coefficient
 
 				-- Define lowest and highest bonus price
 				if item_cost > highest_price then
@@ -375,8 +377,18 @@ function task_manager.task_callback(tsk, state)
 	orig_task_callback(tsk, state)
 end
 
-function get_item_cost_modifier()
-	return compensation_coefficient
+function get_sell_discount()
+	local condlist = ini_trade and ini_trade:r_string_to_condlist("trader", "discounts")
+	local sect = condlist and xr_logic.pick_section_from_condlist(db.actor, nil, condlist)
+	if (not sect) or (sect == "") then
+		return 1 
+	end
+
+	local factor = ini_trade:r_float_ex(sect, "sell") or 1
+	local eco_factor = game_difficulties.get_eco_factor("sell") or 1
+	
+	dbg_printf("[AT] Using sell discount %s for compensation", factor * eco_factor)
+	return factor * eco_factor
 end
 
 function get_base_cost(item)
