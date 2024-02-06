@@ -54,7 +54,7 @@ end
 function should_complete_by_task_functor(task_functor_name)
 	-- Check assault task
 	if task_functor_name == "assault_task_target_functor"
-		-- or task_functor_name == "task_targets_lostzone_all" -- Assault Task with companions?
+		or task_functor_name == "task_targets_lostzone_all"
 		then return assault_enable end
 
 	-- Check bounty task
