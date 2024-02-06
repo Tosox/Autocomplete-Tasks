@@ -2,12 +2,16 @@
 -- Autocomplete v3 (20-01-08)
 -- For Anomaly 1.5 Update 4 Hotfix 8.1 (19-12-05)
 
+local ini_trade = ini_file([[items\trade\trade_generic.ltx]])
+
 valid_pda_devices = {
 	["device_pda_1"] = true,
 	["device_pda_2"] = true,
 	["device_pda_3"] = true,
 	["device_pda_milspec"] = true
 }
+
+local CHECK_INTERVAL = 2.0
 
 local global_enable = nil
 local pda_check = nil
@@ -19,7 +23,7 @@ local bounty_enable = nil
 local fate_enable = nil
 local scripted_enable = nil
 local fetch_enable = nil
-local return_enable = nil
+local retrieve_enable = nil
 local measurements_enable = nil
 local scanner_enable = nil
 
@@ -30,16 +34,11 @@ local destroy_btrs_enable = nil
 local research_hunt_enable = nil
 local recover_tracker_enable = nil
 
-local check_interval = nil
-local finish_message_delay = nil
-local reward_delay = nil
 local whitelist = nil
 local blacklist = nil
 local _dbg = nil
 
 local _task_cache = {}
-local _finished_task_cache = {}
-
 
 function dbg_printf(...)
 	if _dbg then printf(...) end
@@ -47,7 +46,7 @@ end
 
 function has_actor_pda()
 	for k, v in pairs(valid_pda_devices) do
-		if (db.actor:object(k) and true) and (v) then
+		if (db.actor:object(k)) and (v) then
 			return true
 		end
 	end
@@ -57,7 +56,7 @@ end
 function should_complete_by_task_functor(task_functor_name)
 	-- Check assault task
 	if task_functor_name == "assault_task_target_functor"
-		-- or task_functor_name == "task_targets_lostzone_all" -- Assault Task with companions?
+		or task_functor_name == "task_targets_lostzone_all"
 		then return assault_enable end
 
 	-- Check bounty task
@@ -77,9 +76,9 @@ function should_complete_by_task_functor(task_functor_name)
 		or task_functor_name == "multifetch_target_functor"
 		then return fetch_enable end
 
-	-- Check return task
+	-- Check retrieve task
 	if task_functor_name == "drx_sl_quest_item_task_target"
-		then return return_enable end
+		then return retrieve_enable end
 
 	-- Check measurements task
 	if task_functor_name == "general_measure"
@@ -111,31 +110,16 @@ function do_autocompletion()
 	-- Interate tasks
 	local tm = task_manager.get_task_manager()
 	for tid, tsk in pairs(tm.task_info) do
-		-- Proceed to check if task is not queued for completion yet
-		if not _finished_task_cache[tid] then
-			-- Complete task if the check returns true
-			if should_autocomplete(tid, tsk.stage) then
-				dbg_printf("[AT] Autocompleting task: %s", tid)
-				_finished_task_cache[tid] = true
-			
-				CreateTimeEvent("autocomplete_tasks", "finish_message_delay", finish_message_delay, function()
-					-- Send finish task dialog message from task giver
-					send_confirmation_message(tid, tsk.task_giver_id)
-
-					CreateTimeEvent("autocomplete_tasks", "reward_delay", reward_delay, function()
-						-- Complete task
-						tm:set_task_completed(tid)
-
-						-- Remove task from queue
-						_finished_task_cache[tid] = nil
-
-						return true
-					end)
-
-					return true
-				end)
-			end
+		-- Complete task if the check returns true
+		if not should_autocomplete(tid, tsk.stage) then
+			goto continue
 		end
+
+		dbg_printf("[AT] Autocompleting task: %s", tid)
+		send_confirmation_message(tid, tsk.task_giver_id)
+		tm:set_task_completed(tid)
+
+		:: continue ::
 	end
 end
 
@@ -150,13 +134,25 @@ function send_confirmation_message(tid, sender_id)
 	-- Check if task giver is valid
 	local sender_obj = alife_object(sender_id)
 	if not sender_obj then
-		dbg_printf("[AT] Couldn't send confirmation message: task giver is invalid")
+		dbg_printf("[AT] Couldn't send confirmation message: task giver is nil")
 		return
 	end
 
-	-- Temporary fix
-	if not sender_obj.character_name then
-		dbg_printf("[AT] Couldn't send confirmation message: task giver object is incomplete")
+	-- Check if task giver is a squad
+	-- Note: the task giver id for the toolkit fetch tasks by technicians is the id of a squad for some reason
+	if sender_obj:clsid() == clsid.online_offline_group_s then
+		local commander_obj = alife_object(sender_obj:commander_id())
+		if not commander_obj then
+			dbg_printf("[AT] Couldn't send confirmation message: task giver is an invalid squad")
+			return
+		end
+
+		sender_obj = commander_obj
+	end
+
+	-- Still check if valid
+	if (not sender_obj.character_name) or (not sender_obj.community) or (not sender_obj.character_icon) then
+		dbg_printf("[AT] Couldn't send confirmation message: task giver is invalid with clsid %s", sender_obj.clsid and sender_obj:clsid())
 		return
 	end
 
@@ -216,7 +212,7 @@ end
 
 
 function on_option_change()
-	-- General options 
+	-- General options
 	global_enable = z_autocomplete_mcm.get_config("at_general", "enable")
 	pda_check = z_autocomplete_mcm.get_config("at_general", "pda_check")
 	compensate_item_rewards = z_autocomplete_mcm.get_config("at_general", "compensate_item_rewards")
@@ -230,7 +226,7 @@ function on_option_change()
 	scripted_enable = z_autocomplete_mcm.get_config("at_general_tasks", "scripted")
 	scanner_enable = z_autocomplete_mcm.get_config("at_general_tasks", "scanner")
 	fetch_enable = z_autocomplete_mcm.get_config("at_general_tasks", "fetch")
-	return_enable = z_autocomplete_mcm.get_config("at_general_tasks", "return")
+	retrieve_enable = z_autocomplete_mcm.get_config("at_general_tasks", "retrieve")
 
 	-- Special tasks options
 	snitch_enable = z_autocomplete_mcm.get_config("at_special_tasks", "snitch")
@@ -241,27 +237,24 @@ function on_option_change()
 	recover_tracker_enable = z_autocomplete_mcm.get_config("at_special_tasks", "recover_tracker")
 
 	-- Other options
-	check_interval = z_autocomplete_mcm.get_config("at_other", "check_interval")
-	finish_message_delay = z_autocomplete_mcm.get_config("at_other", "finish_message_delay")
-	reward_delay = z_autocomplete_mcm.get_config("at_other", "reward_delay")
 	whitelist = z_autocomplete_mcm.get_config("at_other", "whitelist")
 	blacklist = z_autocomplete_mcm.get_config("at_other", "blacklist")
 	_dbg = z_autocomplete_mcm.get_config("at_other", "debug")
 end
 
 function actor_on_first_update()
-	-- Run the check every 'check_interval' seconds
-	CreateTimeEvent("autocomplete_tasks", "check_autocomplete_tasks", check_interval, function()
+	-- Run the check every 'CHECK_INTERVAL' seconds
+	CreateTimeEvent("autocomplete_tasks", "check_autocomplete_tasks", CHECK_INTERVAL, function()
 		do_autocompletion()
-		ResetTimeEvent("autocomplete_tasks", "check_autocomplete_tasks", check_interval)
+		ResetTimeEvent("autocomplete_tasks", "check_autocomplete_tasks", CHECK_INTERVAL)
 		return false
 	end)
 end
 
 function on_game_start()
-	on_option_change()
 	RegisterScriptCallback("on_option_change", on_option_change)
 	RegisterScriptCallback("actor_on_first_update", actor_on_first_update)
+	on_option_change()
 end
 
 local orig_task_callback = task_manager.task_callback
@@ -313,50 +306,54 @@ function task_manager.task_callback(tsk, state)
 		-- attr[2] - ? (number)
 		-- attr[3] - attribute arguments (table)
 
-		if (attrs) and (attrs[1]) and (attrs[2]) then
-			-- Save the unknown variable just in case
-			if not temp_unknown_attr2 then
-				temp_unknown_attr2 = attrs[2]
-			end
-
-			local attr_name = attrs[1]
-			local attr_args = attrs[3]
-
-			if attr_name == "reward_money" then
-				local money = tonumber(attr_args[1])
-				lowest_reward = lowest_reward + money
-				highest_reward = highest_reward + money
-			elseif attr_name == "reward_random_money" then
-				local money_min = tonumber(attr_args[1])
-				local money_max = tonumber(attr_args[2])
-				lowest_reward = lowest_reward + money_min
-				highest_reward = highest_reward + money_max
-			elseif attr_name == "reward_item" then
-				local item_cost = get_base_cost(attr_args[1]) * get_item_cost_modifier()
-				lowest_reward = lowest_reward + item_cost
-				highest_reward = highest_reward + item_cost
-			elseif attr_name == "reward_random_item" then
-				local lowest_price = math.huge
-				local highest_price = -math.huge
-
-				for _, item in pairs(attr_args) do
-					local item_cost = get_base_cost(item) * get_item_cost_modifier()
-
-					-- Define lowest and highest bonus price
-					if item_cost > highest_price then
-						highest_price = item_cost
-					end
-					if item_cost < lowest_price then
-						lowest_price = item_cost
-					end
-				end
-
-				lowest_reward = lowest_reward + lowest_price
-				highest_reward = highest_reward + highest_price
-			else
-				table.insert(new_on_complete, attrs)
-			end
+		if not ((attrs) and (attrs[1]) and (attrs[2])) then
+			goto continue
 		end
+
+		-- Save the unknown variable just in case
+		if not temp_unknown_attr2 then
+			temp_unknown_attr2 = attrs[2]
+		end
+
+		local attr_name = attrs[1]
+		local attr_args = attrs[3]
+
+		if attr_name == "reward_money" then
+			local money = tonumber(attr_args[1])
+			lowest_reward = lowest_reward + money
+			highest_reward = highest_reward + money
+		elseif attr_name == "reward_random_money" then
+			local money_min = tonumber(attr_args[1])
+			local money_max = tonumber(attr_args[2])
+			lowest_reward = lowest_reward + money_min
+			highest_reward = highest_reward + money_max
+		elseif attr_name == "reward_item" then
+			local item_cost = get_base_cost(attr_args[1]) * get_sell_discount() * compensation_coefficient
+			lowest_reward = lowest_reward + item_cost
+			highest_reward = highest_reward + item_cost
+		elseif attr_name == "reward_random_item" then
+			local lowest_price = math.huge
+			local highest_price = -math.huge
+
+			for _, item in pairs(attr_args) do
+				local item_cost = get_base_cost(item) * get_sell_discount() * compensation_coefficient
+
+				-- Define lowest and highest bonus price
+				if item_cost > highest_price then
+					highest_price = item_cost
+				end
+				if item_cost < lowest_price then
+					lowest_price = item_cost
+				end
+			end
+
+			lowest_reward = lowest_reward + lowest_price
+			highest_reward = highest_reward + highest_price
+		else
+			table.insert(new_on_complete, attrs)
+		end
+
+		:: continue ::
 	end
 
 	-- Add total money reward to table copy if compensation exists
@@ -380,8 +377,18 @@ function task_manager.task_callback(tsk, state)
 	orig_task_callback(tsk, state)
 end
 
-function get_item_cost_modifier()
-	return compensation_coefficient
+function get_sell_discount()
+	local condlist = ini_trade and ini_trade:r_string_to_condlist("trader", "discounts")
+	local sect = condlist and xr_logic.pick_section_from_condlist(db.actor, nil, condlist)
+	if (not sect) or (sect == "") then
+		return 1 
+	end
+
+	local factor = ini_trade:r_float_ex(sect, "sell") or 1
+	local eco_factor = game_difficulties.get_eco_factor("sell") or 1
+	
+	dbg_printf("[AT] Using sell discount %s for compensation", factor * eco_factor)
+	return factor * eco_factor
 end
 
 function get_base_cost(item)

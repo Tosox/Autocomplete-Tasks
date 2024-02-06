@@ -2,7 +2,7 @@
 <string_table>
 
 	<string id="ui_mcm_menu_autocomplete_tasks">
-		<text>Авто-выполнение заданий</text>
+		<text>Autocomplete Tasks</text>
 	</string>
 
 	<string id="ui_mcm_menu_at_general">
@@ -37,28 +37,52 @@
 		<text>Общие задачи</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_assault">
-		<text>Штурмовые задания</text>
+		<text>Задачи зачистка лагеря</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_assault_desc">
+		<text>Уничтожайте мутантов или вражеских сталкеры</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_bounty">
-		<text>Задачи на щедрость</text>
+		<text>Задачи награда за голову</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_bounty_desc">
+		<text>Устраните конкретного сталкер</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fate">
 		<text>Задачи судьбы</text>
 	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fate_desc">
+		<text>Задание "Радиомолчание", "Общее бремя" и "Отследить сигнал SOS"</text>
+	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scripted">
-		<text>Скриптовые задачи</text>
+		<text>Сюжетные задачи</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scripted_desc">
+		<text>Задание "Вернуть товар Сидоровича", "Найти пропавшего бойца «Долга»" и "Вернуть прототип детектора"</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fetch">
-		<text>Получение задачи</text>
+		<text>Задачи сбор предметов</text>
 	</string>
-	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_return">
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fetch_desc">
+		<text>Найдите несколько специфических предметов и верните их тому, кто дает задание</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_retrieve">
 		<text>Задачи возврата</text>
 	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_retrieve_desc">
+		<text>Поиск заданного тайника и возврат определенного предмета из него выдавшему задание</text>
+	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_measurements">
-		<text>Измерения задачи</text>
+		<text>Замеры задачи</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_measurements_desc">
+		<text>Проведите замеры в аномальном поле</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scanner">
 		<text>Разместить задачи сканера</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scanner_desc">
+		<text>Задание "Исследование аномалий" и "Жажда знаний: установить сканер рядом с аномалией «Симбионт»"</text>
 	</string>
 
 	<string id="ui_mcm_menu_at_special_tasks">
@@ -85,15 +109,6 @@
 
 	<string id="ui_mcm_menu_at_other">
 		<text>Другие настройки</text>
-	</string>
-	<string id="ui_mcm_autocomplete_tasks_at_other_check_interval">
-		<text>Интервал проверки авто-выполнение</text>
-	</string>
-	<string id="ui_mcm_autocomplete_tasks_at_other_finish_message_delay">
-		<text>Задержка сообщения о выдаче задания</text>
-	</string>
-	<string id="ui_mcm_autocomplete_tasks_at_other_reward_delay">
-		<text>Задержка вознаграждения</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_other_whitelist">
 		<text>белый список</text>
