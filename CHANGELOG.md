@@ -41,3 +41,10 @@
 * Fixed a CTD when sending the task finish message
 * Fixed rare 0 money rewards
 * Added task "esc_2_12_stalker_wolf_task_3" to the blacklist by default
+
+# v2.1.2:
+* Added MCM option descriptions
+* Reworked Russian translation
+* Slightly adjusted item compensation formula
+* Removed the reward and task giver message delay for now since it was causing issues
+* Fixed task giver message for certain NPCs
