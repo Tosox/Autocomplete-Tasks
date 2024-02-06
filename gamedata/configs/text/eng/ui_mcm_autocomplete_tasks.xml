@@ -27,7 +27,7 @@
 		<text>Replaces any received items with their money equivalent</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_compensation_coefficient">
-		<text>Compensation Coefficient</text>
+		<text>Compensation coefficient</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_compensation_coefficient_desc">
 		<text>1.0 - The base cost of the item</text>
@@ -37,28 +37,52 @@
 		<text>General Tasks</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_assault">
-		<text>Assault Tasks</text>
+		<text>Camp Assault Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_assault_desc">
+		<text>Eliminate mutants or enemy stalkers</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_bounty">
 		<text>Bounty Tasks</text>
 	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_bounty_desc">
+		<text>Eliminate a specific stalker</text>
+	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fate">
 		<text>Fate Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fate_desc">
+		<text>Task "Lost Signal", "Investigate the Scouts' Location" and "Trace the Emergency Signal"</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scripted">
 		<text>Scripted Tasks</text>
 	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scripted_desc">
+		<text>Task "Recover Sidorovich's shipment", "Find the Missing Duty Soldier" and "Recover the detector prototype"</text>
+	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fetch">
 		<text>Fetch Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fetch_desc">
+		<text>Find some specific items and return them to the task giver</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_retrieve">
 		<text>Retrieve Tasks</text>
 	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_retrieve_desc">
+		<text>Search a given stash and return a specific item from it to the task giver</text>
+	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_measurements">
-		<text>Take Measurements Tasks</text>
+		<text>Measure Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_measurements_desc">
+		<text>Take measurements in an anomaly field</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scanner">
 		<text>Place Scanner Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_scanner_desc">
+		<text>Task "Scanning Field" and "Plant the Scanner Near the Symbiont Anomaly"</text>
 	</string>
 	
 	<string id="ui_mcm_menu_at_special_tasks">
