@@ -6,6 +6,8 @@ local defaults = {
 
 	["at_general_tasks/assault"] = true,
 	["at_general_tasks/bounty"] = true,
+	["at_general_tasks/hostage"] = false,
+	["at_general_tasks/spy_extract"] = false,
 	["at_general_tasks/fate"] = false,
 	["at_general_tasks/scripted"] = false,
 	["at_general_tasks/fetch"] = false,
@@ -46,6 +48,8 @@ function on_mcm_load()
 					{ id = "title", type = "slide", link = "ui_options_slider_mask", text = "ui_mcm_menu_at_general_tasks", size = { 512, 50 }, spacing = 20 },
 					{ id = "assault", type = "check", val = 1, def = defaults["at_general_tasks/assault"] },
 					{ id = "bounty", type = "check", val = 1, def = defaults["at_general_tasks/bounty"] },
+					{ id = "hostage", type = "check", val = 1, def = defaults["at_general_tasks/hostage"] },
+					{ id = "spy_extract", type = "check", val = 1, def = defaults["at_general_tasks/spy_extract"] },
 					{ id = "fate", type = "check", val = 1, def = defaults["at_general_tasks/fate"] },
 					{ id = "scripted", type = "check", val = 1, def = defaults["at_general_tasks/scripted"] },
 					{ id = "fetch", type = "check", val = 1, def = defaults["at_general_tasks/fetch"] },

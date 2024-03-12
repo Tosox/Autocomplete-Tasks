@@ -2,6 +2,8 @@
 -- Autocomplete v3 (20-01-08)
 -- For Anomaly 1.5 Update 4 Hotfix 8.1 (19-12-05)
 
+local get_mcm_config = z_autocomplete_mcm.get_config
+
 local ini_trade = ini_file([[items\trade\trade_generic.ltx]])
 
 valid_pda_devices = {
@@ -13,35 +15,10 @@ valid_pda_devices = {
 
 local CHECK_INTERVAL = 2.0
 
-local global_enable = nil
-local pda_check = nil
-local compensate_item_rewards = nil
-local compensation_coefficient = nil
-
-local assault_enable = nil
-local bounty_enable = nil
-local fate_enable = nil
-local scripted_enable = nil
-local fetch_enable = nil
-local retrieve_enable = nil
-local measurements_enable = nil
-local scanner_enable = nil
-
-local snitch_enable = nil
-local spring_clean_enable = nil
-local defend_pump_station_enable = nil
-local destroy_btrs_enable = nil
-local research_hunt_enable = nil
-local recover_tracker_enable = nil
-
-local whitelist = nil
-local blacklist = nil
-local _dbg = nil
-
 local _task_cache = {}
 
 function dbg_printf(...)
-	if _dbg then printf(...) end
+	if get_mcm_config("at_other", "debug") then printf(...) end
 end
 
 function has_actor_pda()
@@ -57,44 +34,52 @@ function should_complete_by_task_functor(task_functor_name)
 	-- Check assault task
 	if task_functor_name == "assault_task_target_functor"
 		or task_functor_name == "task_targets_lostzone_all"
-		then return assault_enable end
+		then return get_mcm_config("at_general_tasks", "assault") end
 
 	-- Check bounty task
 	if task_functor_name == "general_bounty_task"
-		then return bounty_enable end
+		then return get_mcm_config("at_general_tasks", "bounty") end
+
+	-- Check hostage task
+	if task_functor_name == "simulation_task_target"
+		then return get_mcm_config("at_general_tasks", "hostage") end
+
+	-- Check spy extraction task
+	if task_functor_name == "spy_task_target_functor"
+		then return get_mcm_config("at_general_tasks", "spy_extract") end
 
 	-- Check fate task
 	if task_functor_name == "general_fate"
-		then return fate_enable end
+		then return get_mcm_config("at_general_tasks", "fate") end
 
 	-- Check scripted task
 	if task_functor_name == "recover_item_on_corpse_target_functor"
-		then return scripted_enable end
+		then return get_mcm_config("at_general_tasks", "scripted") end
 
 	-- Check fetch task
 	if task_functor_name == "general_fetch_task"
 		or task_functor_name == "multifetch_target_functor"
-		then return fetch_enable end
+		then return get_mcm_config("at_general_tasks", "fetch") end
 
 	-- Check retrieve task
 	if task_functor_name == "drx_sl_quest_item_task_target"
-		then return retrieve_enable end
+		then return get_mcm_config("at_general_tasks", "retrieve") end
 
 	-- Check measurements task
 	if task_functor_name == "general_measure"
-		then return measurements_enable end
+		then return get_mcm_config("at_general_tasks", "measurements") end
 
 	-- Check scanner task
 	if task_functor_name == "anomaly_scanner_task_target"
-		then return scanner_enable end
+		then return get_mcm_config("at_general_tasks", "scanner") end
 
 	-- Check special tasks
-	if task_functor_name == "top_10_task_target_functor" then return snitch_enable end
-	if task_functor_name == "mutants_in_map_target" then return spring_clean_enable end
-	if task_functor_name == "gd_task_target_functor" then return defend_pump_station_enable end
-	if task_functor_name == "veh_destroy_tf" then return destroy_btrs_enable end
-	if task_functor_name == "yan_ecolog_semenov_task_target_1" then return research_hunt_enable end
-	if task_functor_name == "recover_mutant_data_target" then return recover_tracker_enable end
+	if task_functor_name == "top_10_task_target_functor" then return get_mcm_config("at_special_tasks", "snitch") end
+	if task_functor_name == "mutants_in_map_target" then return get_mcm_config("at_special_tasks", "spring_clean") end
+	if task_functor_name == "gd_task_target_functor" then return get_mcm_config("at_special_tasks", "defend_pump_station") end
+	if task_functor_name == "veh_destroy_tf" then return get_mcm_config("at_special_tasks", "destroy_btrs") end
+	if task_functor_name == "yan_ecolog_semenov_task_target_1" then return get_mcm_config("at_special_tasks", "research_hunt") end
+	if task_functor_name == "recover_mutant_data_target" then return get_mcm_config("at_special_tasks", "recover_tracker") end
 
 	return false
 end
@@ -102,10 +87,10 @@ end
 
 function do_autocompletion()
 	-- Check if user enabled autocompletion
-	if not global_enable then return end
+	if not get_mcm_config("at_general", "enable") then return end
 
 	-- Check if user enabled the pda check and return if actor doesn't have a pda
-	if pda_check and not has_actor_pda() then return end
+	if get_mcm_config("at_general", "pda_check") and not has_actor_pda() then return end
 
 	-- Interate tasks
 	local tm = task_manager.get_task_manager()
@@ -195,51 +180,19 @@ function should_autocomplete(tid, stage)
 	if tonumber(tsk.stage_complete) ~= tonumber(stage) then return false end
 
 	-- Check if task is whitelisted
-	if is_listed(whitelist, tid) then return true end
+	if is_listed(get_mcm_config("at_other", "whitelist"), tid) then return true end
 
 	-- Check if task is blacklisted
-	if is_listed(blacklist, tid) then return false end
+	if is_listed(get_mcm_config("at_other", "blacklist"), tid) then return false end
 
 	-- Check if task is not a storyline task
-	if tsk.storyline and tsk.storyline == "true" then return false end
+	if (tsk.storyline) and (tsk.storyline == "true") then return false end
 
 	-- Check if task has a whitelisted target functor
 	if not tsk.target_functor then return false end
 	if not should_complete_by_task_functor(tsk.target_functor) then return false end
 
 	return true
-end
-
-
-function on_option_change()
-	-- General options
-	global_enable = z_autocomplete_mcm.get_config("at_general", "enable")
-	pda_check = z_autocomplete_mcm.get_config("at_general", "pda_check")
-	compensate_item_rewards = z_autocomplete_mcm.get_config("at_general", "compensate_item_rewards")
-	compensation_coefficient = z_autocomplete_mcm.get_config("at_general", "compensation_coefficient")
-
-	-- General tasks options
-	assault_enable = z_autocomplete_mcm.get_config("at_general_tasks", "assault")
-	bounty_enable = z_autocomplete_mcm.get_config("at_general_tasks", "bounty")
-	measurements_enable = z_autocomplete_mcm.get_config("at_general_tasks", "measurements")
-	fate_enable = z_autocomplete_mcm.get_config("at_general_tasks", "fate")
-	scripted_enable = z_autocomplete_mcm.get_config("at_general_tasks", "scripted")
-	scanner_enable = z_autocomplete_mcm.get_config("at_general_tasks", "scanner")
-	fetch_enable = z_autocomplete_mcm.get_config("at_general_tasks", "fetch")
-	retrieve_enable = z_autocomplete_mcm.get_config("at_general_tasks", "retrieve")
-
-	-- Special tasks options
-	snitch_enable = z_autocomplete_mcm.get_config("at_special_tasks", "snitch")
-	spring_clean_enable = z_autocomplete_mcm.get_config("at_special_tasks", "spring_clean")
-	defend_pump_station_enable = z_autocomplete_mcm.get_config("at_special_tasks", "defend_pump_station")
-	destroy_btrs_enable = z_autocomplete_mcm.get_config("at_special_tasks", "destroy_btrs")
-	research_hunt_enable = z_autocomplete_mcm.get_config("at_special_tasks", "research_hunt")
-	recover_tracker_enable = z_autocomplete_mcm.get_config("at_special_tasks", "recover_tracker")
-
-	-- Other options
-	whitelist = z_autocomplete_mcm.get_config("at_other", "whitelist")
-	blacklist = z_autocomplete_mcm.get_config("at_other", "blacklist")
-	_dbg = z_autocomplete_mcm.get_config("at_other", "debug")
 end
 
 function actor_on_first_update()
@@ -252,15 +205,13 @@ function actor_on_first_update()
 end
 
 function on_game_start()
-	RegisterScriptCallback("on_option_change", on_option_change)
 	RegisterScriptCallback("actor_on_first_update", actor_on_first_update)
-	on_option_change()
 end
 
 local orig_task_callback = task_manager.task_callback
 function task_manager.task_callback(tsk, state)
 	-- Check if user wants to compensate items
-	if (not global_enable) or (not compensate_item_rewards) then
+	if (not get_mcm_config("at_general", "enable")) or (not get_mcm_config("at_general", "compensate_item_rewards")) then
 		orig_task_callback(tsk, state)
 		return
 	end
@@ -328,7 +279,7 @@ function task_manager.task_callback(tsk, state)
 			lowest_reward = lowest_reward + money_min
 			highest_reward = highest_reward + money_max
 		elseif attr_name == "reward_item" then
-			local item_cost = get_base_cost(attr_args[1]) * get_sell_discount() * compensation_coefficient
+			local item_cost = get_base_cost(attr_args[1]) * get_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
 			lowest_reward = lowest_reward + item_cost
 			highest_reward = highest_reward + item_cost
 		elseif attr_name == "reward_random_item" then
@@ -336,7 +287,7 @@ function task_manager.task_callback(tsk, state)
 			local highest_price = -math.huge
 
 			for _, item in pairs(attr_args) do
-				local item_cost = get_base_cost(item) * get_sell_discount() * compensation_coefficient
+				local item_cost = get_base_cost(item) * get_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
 
 				-- Define lowest and highest bonus price
 				if item_cost > highest_price then

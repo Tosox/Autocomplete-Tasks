@@ -48,6 +48,18 @@
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_bounty_desc">
 		<text>Eliminate a specific stalker</text>
 	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_hostage">
+		<text>Hostage Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_hostage_desc">
+		<text>Eliminate enemy stalkers and save the hostage</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_spy_extract">
+		<text>Spy Extraction Tasks</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_spy_extract_desc">
+		<text>Eliminate an enemy squad and extract the spy</text>
+	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fate">
 		<text>Fate Tasks</text>
 	</string>

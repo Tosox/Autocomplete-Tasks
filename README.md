@@ -1,6 +1,6 @@
 # Autocomplete Tasks
 
-> Note: If you have any suggestions write me a [DM](https://www.moddb.com/messages/compose?to=Tosox) on Moddb or Discord [Tosox#0573]
+> Note: If you have any suggestions write me a [DM](https://www.moddb.com/messages/compose?to=Tosox) on ModDB or Discord [@tosox]
 
 ## Description
 
@@ -15,7 +15,6 @@ Since [AeneasH's](https://www.moddb.com/members/aeneash) [Autocomplete Unofficia
 
 ## Installation
 
-* Download the [latest release](https://www.moddb.com/mods/stalker-anomaly/addons/dltx-unofficial-autocomplete-v4)
 * Install the mod (preferably with [Mod Organizer](https://github.com/ModOrganizer2/modorganizer/releases/))
 * Open the game and enjoy
 
