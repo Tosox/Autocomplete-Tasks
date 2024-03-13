@@ -1,0 +1,53 @@
+local get_mcm_config = autocomplete_tasks_mcm.get_config
+
+local ini_trade = ini_file([[items\trade\trade_generic.ltx]])
+
+function dbg_printf(...)
+	if not get_mcm_config("at_other", "debug") then return end
+    printf(...)
+end
+
+function has_pda(who)
+    local valid_pda_devices = {
+        ["device_pda_1"] = true,
+        ["device_pda_2"] = true,
+        ["device_pda_3"] = true,
+        ["device_pda_milspec"] = true
+    }
+
+    who = who or db.actor
+
+    for k, v in pairs(valid_pda_devices) do
+		if (who:object(k)) and (v) then
+			return true
+		end
+	end
+
+	return false
+end
+
+function get_generic_sell_discount()
+	local condlist = ini_trade:r_string_to_condlist("trader", "discounts")
+	local sect = (condlist) and (xr_logic.pick_section_from_condlist(db.actor, nil, condlist))
+	if (not sect) or (sect == "") then
+		return 1
+	end
+
+	local factor = ini_trade:r_float_ex(sect, "sell") or 1
+	local eco_factor = game_difficulties.get_eco_factor("sell") or 1
+	
+	dbg_printf("[AT] Using sell discount %s for compensation", factor * eco_factor)
+	return factor * eco_factor
+end
+
+function get_base_cost(item)
+	local item_name, item_amount = string.match(item, "(.*)__([1-9])")
+    if not item_name then
+        return ini_sys:r_float(item, "cost") or 0
+    end
+
+	-- Item is a multiuse item with a defined amount
+	local max_uses = ini_sys:r_float(item_name, "max_uses") or item_amount
+	local item_cost = ini_sys:r_float(item_name, "cost") or 0
+	return item_cost * (item_amount / max_uses)
+end

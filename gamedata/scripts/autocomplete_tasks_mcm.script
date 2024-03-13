@@ -1,4 +1,4 @@
-local defaults = {
+defaults = {
 	["at_general/enable"] = true,
 	["at_general/pda_check"] = true,
 	["at_general/compensate_item_rewards"] = true,
@@ -28,7 +28,11 @@ local defaults = {
 }
 
 function get_config(module, key)
-	if ui_mcm then return ui_mcm.get("autocomplete_tasks/" .. module .. "/" .. key) else return defaults[module .. "/" .. key] end
+	if ui_mcm then
+		return ui_mcm.get("autocomplete_tasks/" .. module .. "/" .. key)
+	else
+		return defaults[module .. "/" .. key]
+	end
 end
 
 function on_mcm_load()

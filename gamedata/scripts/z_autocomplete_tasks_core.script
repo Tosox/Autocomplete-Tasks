@@ -2,33 +2,13 @@
 -- Autocomplete v3 (20-01-08)
 -- For Anomaly 1.5 Update 4 Hotfix 8.1 (19-12-05)
 
-local get_mcm_config = z_autocomplete_mcm.get_config
-
-local ini_trade = ini_file([[items\trade\trade_generic.ltx]])
-
-valid_pda_devices = {
-	["device_pda_1"] = true,
-	["device_pda_2"] = true,
-	["device_pda_3"] = true,
-	["device_pda_milspec"] = true
-}
+local get_mcm_config = autocomplete_tasks_mcm.get_config
+local get_base_cost = autocomplete_tasks_utils.get_base_cost
+local get_generic_sell_discount = autocomplete_tasks_utils.get_generic_sell_discount
 
 local CHECK_INTERVAL = 2.0
 
 local _task_cache = {}
-
-function dbg_printf(...)
-	if get_mcm_config("at_other", "debug") then printf(...) end
-end
-
-function has_actor_pda()
-	for k, v in pairs(valid_pda_devices) do
-		if (db.actor:object(k)) and (v) then
-			return true
-		end
-	end
-	return false
-end
 
 function should_complete_by_task_functor(task_functor_name)
 	-- Check assault task
@@ -219,34 +199,34 @@ function on_game_start()
 	RegisterScriptCallback("actor_on_first_update", actor_on_first_update)
 end
 
-local orig_task_callback = task_manager.task_callback
-function task_manager.task_callback(tsk, state)
+task_manager_task_callback = task_manager.task_callback
+task_manager.task_callback = function(tsk, stage)
 	-- Check if user wants to compensate items
 	if (not get_mcm_config("at_general", "enable")) or (not get_mcm_config("at_general", "compensate_item_rewards")) then
-		orig_task_callback(tsk, state)
+		task_manager_task_callback(tsk, stage)
 		return
 	end
 
 	local tsk_id = tsk:get_id()
 
 	-- Check if last stage
-	if state ~= task.completed then
+	if stage ~= task.completed then
 		dbg_printf("[AT] No compensation for task %s: not completed yet", tsk_id)
-		orig_task_callback(tsk, state)
+		task_manager_task_callback(tsk, stage)
 		return
 	end
 
 	-- Check if task id is cached
 	if (not tsk_id) or (not _task_cache[tsk_id]) then
 		dbg_printf("[AT] No compensation for task %s: task not cached", tsk_id)
-		orig_task_callback(tsk, state)
+		task_manager_task_callback(tsk, stage)
 		return
 	end
 
 	-- Check if task should get autocompleted
 	if not should_autocomplete(tsk_id, _task_cache[tsk_id].stage_complete) then
 		dbg_printf("[AT] No compensation for task %s: task category not enabled", tsk_id)
-		orig_task_callback(tsk, state)
+		task_manager_task_callback(tsk, stage)
 		return
 	end
 
@@ -254,7 +234,7 @@ function task_manager.task_callback(tsk, state)
 	local rtask = task_manager.get_task_manager().task_info[tsk_id]
 	if (not rtask) or (not rtask.on_complete) or (not rtask.on_complete[1]) or (not rtask.on_complete[1][3]) then
 		dbg_printf("[AT] No compensation for task %s: on_complete attribute is non-existent or invalid", tsk_id)
-		orig_task_callback(tsk, state)
+		task_manager_task_callback(tsk, stage)
 		return
 	end
 
@@ -290,7 +270,7 @@ function task_manager.task_callback(tsk, state)
 			lowest_reward = lowest_reward + money_min
 			highest_reward = highest_reward + money_max
 		elseif attr_name == "reward_item" then
-			local item_cost = get_base_cost(attr_args[1]) * get_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
+			local item_cost = get_base_cost(attr_args[1]) * get_generic_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
 			lowest_reward = lowest_reward + item_cost
 			highest_reward = highest_reward + item_cost
 		elseif attr_name == "reward_random_item" then
@@ -298,7 +278,7 @@ function task_manager.task_callback(tsk, state)
 			local highest_price = -math.huge
 
 			for _, item in pairs(attr_args) do
-				local item_cost = get_base_cost(item) * get_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
+				local item_cost = get_base_cost(item) * get_generic_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
 
 				-- Define lowest and highest bonus price
 				if item_cost > highest_price then
@@ -336,32 +316,5 @@ function task_manager.task_callback(tsk, state)
 	dbg_printf("[AT] Total reward after item compensation with min reward %s and max reward %s", lowest_reward, highest_reward)
 	rtask.on_complete[1][3] = new_on_complete
 
-	orig_task_callback(tsk, state)
-end
-
-function get_sell_discount()
-	local condlist = ini_trade and ini_trade:r_string_to_condlist("trader", "discounts")
-	local sect = condlist and xr_logic.pick_section_from_condlist(db.actor, nil, condlist)
-	if (not sect) or (sect == "") then
-		return 1 
-	end
-
-	local factor = ini_trade:r_float_ex(sect, "sell") or 1
-	local eco_factor = game_difficulties.get_eco_factor("sell") or 1
-	
-	dbg_printf("[AT] Using sell discount %s for compensation", factor * eco_factor)
-	return factor * eco_factor
-end
-
-function get_base_cost(item)
-	local item_name, item_amount = string.match(item, "(.*)__([1-9])")
-
-	-- Check if item is a multiuse item with a defined amount
-	if item_name then
-		local max_uses = ini_sys:r_float(item_name, "max_uses") or item_amount
-		local item_cost = ini_sys:r_float(item_name, "cost") or 1000
-		return item_cost * (item_amount / max_uses)
-	else
-		return ini_sys:r_float(item, "cost") or 500
-	end
+	task_manager_task_callback(tsk, stage)
 end
