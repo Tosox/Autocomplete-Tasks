@@ -159,6 +159,16 @@ function is_listed(list, tid)
 	return false
 end
 
+function normalize_complete_stage(task_functor_name, stage)
+	-- Adjust complete stage for tasks like "Search and Rescue"
+
+	if task_functor_name == "spy_task_target_functor" then
+		stage = stage - 1
+	end
+
+	return stage
+end
+
 function should_autocomplete(tid, stage)
 	-- Check if task is already cached
 	if not _task_cache[tid] then
@@ -174,10 +184,8 @@ function should_autocomplete(tid, stage)
 
 	local tsk = _task_cache[tid]
 
-	-- Check if task reached last stage
-	if not stage then return false end
-	if not tsk.stage_complete then return false end
-	if tonumber(tsk.stage_complete) ~= tonumber(stage) then return false end
+	-- Check if task is not a storyline task
+	if (tsk.storyline) and (tsk.storyline == "true") then return false end
 
 	-- Check if task is whitelisted
 	if is_listed(get_mcm_config("at_other", "whitelist"), tid) then return true end
@@ -185,12 +193,15 @@ function should_autocomplete(tid, stage)
 	-- Check if task is blacklisted
 	if is_listed(get_mcm_config("at_other", "blacklist"), tid) then return false end
 
-	-- Check if task is not a storyline task
-	if (tsk.storyline) and (tsk.storyline == "true") then return false end
-
 	-- Check if task has a whitelisted target functor
 	if not tsk.target_functor then return false end
 	if not should_complete_by_task_functor(tsk.target_functor) then return false end
+
+	-- Check if task reached last stage
+	if not stage then return false end
+	if not tsk.stage_complete then return false end
+	local normalized_stage_complete = normalize_complete_stage(tsk.target_functor, tonumer(tsk.stage_complete))
+	if normalized_stage_complete ~= stage then return false end
 
 	return true
 end
