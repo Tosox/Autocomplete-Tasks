@@ -28,26 +28,26 @@ end
 
 function get_generic_sell_discount()
 	local condlist = ini_trade:r_string_to_condlist("trader", "discounts")
-	local sect = (condlist) and (xr_logic.pick_section_from_condlist(db.actor, nil, condlist))
-	if (not sect) or (sect == "") then
+	local sec = (condlist) and (xr_logic.pick_section_from_condlist(db.actor, nil, condlist))
+	if (not sec) or (sec == "") then
 		return 1
 	end
 
-	local factor = ini_trade:r_float_ex(sect, "sell") or 1
+	local factor = ini_trade:r_float_ex(sec, "sell") or 1
 	local eco_factor = game_difficulties.get_eco_factor("sell") or 1
 	
 	dbg_printf("[AT] Using sell discount %s for compensation", factor * eco_factor)
 	return factor * eco_factor
 end
 
-function get_base_cost(item)
-	local item_name, item_amount = string.match(item, "(.*)__([1-9])")
-    if not item_name then
-        return ini_sys:r_float(item, "cost") or 0
+function get_base_cost(itm)
+	local sec, amount = string.match(itm, "(.*)__([1-9])")
+    if not sec then
+        return ini_sys:r_float(itm, "cost") or 0
     end
 
-	-- Item is a multiuse item with a defined amount
-	local max_uses = ini_sys:r_float(item_name, "max_uses") or item_amount
-	local item_cost = ini_sys:r_float(item_name, "cost") or 0
-	return item_cost * (item_amount / max_uses)
+	-- itm is a multiuse item with a defined amount
+	local max_uses = ini_sys:r_float(sec, "max_uses") or amount
+	local cost = ini_sys:r_float(sec, "cost") or 0
+	return cost * (amount / max_uses)
 end
