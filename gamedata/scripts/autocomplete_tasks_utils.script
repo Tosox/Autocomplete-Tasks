@@ -36,7 +36,6 @@ function get_generic_sell_discount()
 	local factor = ini_trade:r_float_ex(sec, "sell") or 1
 	local eco_factor = game_difficulties.get_eco_factor("sell") or 1
 	
-	dbg_printf("[AT] Using sell discount %s for compensation", factor * eco_factor)
 	return factor * eco_factor
 end
 

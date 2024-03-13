@@ -3,12 +3,34 @@
 -- For Anomaly 1.5 Update 4 Hotfix 8.1 (19-12-05)
 
 local get_mcm_config = autocomplete_tasks_mcm.get_config
-local get_base_cost = autocomplete_tasks_utils.get_base_cost
-local get_generic_sell_discount = autocomplete_tasks_utils.get_generic_sell_discount
+local dbg_printf = autocomplete_tasks_utils.dbg_printf
 
 local CHECK_INTERVAL = 2.0
 
 local _task_cache = {}
+
+function do_autocompletion()
+	-- Check if user enabled autocompletion
+	if not get_mcm_config("at_general", "enable") then return end
+
+	-- Check if user enabled the pda check and return if actor doesn't have a pda
+	if get_mcm_config("at_general", "pda_check") and not autocomplete_tasks_utils.has_pda(db.actor) then return end
+
+	-- Interate tasks
+	local tm = task_manager.get_task_manager()
+	for tid, tsk in pairs(tm.task_info) do
+		-- Complete task if the check returns true
+		if not should_autocomplete(tid, tsk.stage) then
+			goto continue
+		end
+
+		dbg_printf("[AT] Autocompleting task: %s", tid)
+		send_confirmation_message(tid, tsk.task_giver_id)
+		tm:set_task_completed(tid)
+
+		:: continue ::
+	end
+end
 
 function should_complete_by_task_functor(task_functor_name)
 	-- Check assault task
@@ -64,30 +86,6 @@ function should_complete_by_task_functor(task_functor_name)
 	return false
 end
 
-
-function do_autocompletion()
-	-- Check if user enabled autocompletion
-	if not get_mcm_config("at_general", "enable") then return end
-
-	-- Check if user enabled the pda check and return if actor doesn't have a pda
-	if get_mcm_config("at_general", "pda_check") and not has_actor_pda() then return end
-
-	-- Interate tasks
-	local tm = task_manager.get_task_manager()
-	for tid, tsk in pairs(tm.task_info) do
-		-- Complete task if the check returns true
-		if not should_autocomplete(tid, tsk.stage) then
-			goto continue
-		end
-
-		dbg_printf("[AT] Autocompleting task: %s", tid)
-		send_confirmation_message(tid, tsk.task_giver_id)
-		tm:set_task_completed(tid)
-
-		:: continue ::
-	end
-end
-
 function send_confirmation_message(tid, sender_id)
 	-- Check if task complete description exists
 	local finish_message = _task_cache[tid].task_complete_descr
@@ -141,6 +139,7 @@ end
 
 function normalize_complete_stage(task_functor_name, stage)
 	-- Adjust complete stage for tasks like "Search and Rescue"
+	stage = tonumber(stage)
 
 	if task_functor_name == "spy_task_target_functor" then
 		stage = stage - 1
@@ -180,8 +179,8 @@ function should_autocomplete(tid, stage)
 	-- Check if task reached last stage
 	if not stage then return false end
 	if not tsk.stage_complete then return false end
-	local normalized_stage_complete = normalize_complete_stage(tsk.target_functor, tonumer(tsk.stage_complete))
-	if normalized_stage_complete ~= stage then return false end
+	local normalized_stage_complete = normalize_complete_stage(tsk.target_functor, tsk.stage_complete)
+	if normalized_stage_complete ~= tonumber(stage) then return false end
 
 	return true
 end
@@ -270,7 +269,8 @@ task_manager.task_callback = function(tsk, stage)
 			lowest_reward = lowest_reward + money_min
 			highest_reward = highest_reward + money_max
 		elseif attr_name == "reward_item" then
-			local item_cost = get_base_cost(attr_args[1]) * get_generic_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
+			dbg_printf("[AT] Compensate item %s", attr_args[1])
+			local item_cost = autocomplete_tasks_utils.get_base_cost(attr_args[1]) * autocomplete_tasks_utils.get_generic_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
 			lowest_reward = lowest_reward + item_cost
 			highest_reward = highest_reward + item_cost
 		elseif attr_name == "reward_random_item" then
@@ -278,7 +278,8 @@ task_manager.task_callback = function(tsk, stage)
 			local highest_price = -math.huge
 
 			for _, item in pairs(attr_args) do
-				local item_cost = get_base_cost(item) * get_generic_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
+				dbg_printf("[AT] Compensate item %s", item)
+				local item_cost = autocomplete_tasks_utils.get_base_cost(item) * autocomplete_tasks_utils.get_generic_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
 
 				-- Define lowest and highest bonus price
 				if item_cost > highest_price then
@@ -313,6 +314,7 @@ task_manager.task_callback = function(tsk, stage)
 	end
 
 	-- Assign table copy to 'on_complete' rewards table for task
+	dbg_printf("[AT] Used sell discount %s for compensation", autocomplete_tasks_utils.get_generic_sell_discount())
 	dbg_printf("[AT] Total reward after item compensation with min reward %s and max reward %s", lowest_reward, highest_reward)
 	rtask.on_complete[1][3] = new_on_complete
 

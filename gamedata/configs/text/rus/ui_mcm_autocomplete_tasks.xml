@@ -55,7 +55,7 @@
 		<text>Уничтожьте вражеских сталкеры и спасите заложницу</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_spy_extract">
-		<text>Задачи по извлечению шпиона</text>
+		<text>Задачи по извлечению шпиона (нестабильная)</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_spy_extract_desc">
 		<text>Уничтожьте вражеский отряд и извлеките шпиона</text>
