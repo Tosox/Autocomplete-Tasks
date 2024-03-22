@@ -55,7 +55,7 @@
 		<text>Eliminate enemy stalkers and save the hostage</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_spy_extract">
-		<text>Spy Extraction Tasks (buggy)</text>
+		<text>Spy Extraction Tasks</text>
 	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_spy_extract_desc">
 		<text>Eliminate an enemy squad and extract the spy</text>

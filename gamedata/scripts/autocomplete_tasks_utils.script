@@ -50,3 +50,17 @@ function get_base_cost(itm)
 	local cost = ini_sys:r_float(sec, "cost") or 0
 	return cost * (amount / max_uses)
 end
+
+function stop_talk_squad(squad)
+	if not squad then
+		return
+	end
+
+	for k in squad:squad_members() do 
+		local npc = db.storage[k.id] and db.storage[k.id].object
+		if (npc) and (npc:is_talking()) then
+			db.actor:stop_talk()
+			npc:stop_talk()
+		end
+	end
+end

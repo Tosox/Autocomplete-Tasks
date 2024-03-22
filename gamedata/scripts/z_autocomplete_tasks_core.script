@@ -24,9 +24,11 @@ function do_autocompletion()
 			goto continue
 		end
 
-		dbg_printf("[AT] Autocompleting task: %s", tid)
+		printf("[AT] Autocompleting task: %s", tid)
 		send_confirmation_message(tid, tsk.task_giver_id)
+
 		tm:set_task_completed(tid)
+		post_completion_cleanup(_task_cache[tid].target_functor, tid)
 
 		:: continue ::
 	end
@@ -97,7 +99,7 @@ function send_confirmation_message(tid, sender_id)
 	-- Check if task giver is valid
 	local sender_obj = alife_object(sender_id)
 	if not sender_obj then
-		dbg_printf("[AT] Couldn't send confirmation message: task giver is nil")
+		printf("[AT] Couldn't send confirmation message: task giver is nil")
 		return
 	end
 
@@ -106,7 +108,7 @@ function send_confirmation_message(tid, sender_id)
 	if sender_obj:clsid() == clsid.online_offline_group_s then
 		local commander_obj = alife_object(sender_obj:commander_id())
 		if not commander_obj then
-			dbg_printf("[AT] Couldn't send confirmation message: task giver is an invalid squad")
+			printf("[AT] Couldn't send confirmation message: task giver is an invalid squad")
 			return
 		end
 
@@ -115,7 +117,7 @@ function send_confirmation_message(tid, sender_id)
 
 	-- Still check if valid
 	if (not sender_obj.character_name) or (not sender_obj.community) or (not sender_obj.character_icon) then
-		dbg_printf("[AT] Couldn't send confirmation message: task giver is invalid with clsid %s", sender_obj.clsid and sender_obj:clsid())
+		printf("[AT] Couldn't send confirmation message: task giver is invalid with clsid %s", sender_obj.clsid and sender_obj:clsid())
 		return
 	end
 
@@ -137,6 +139,47 @@ function is_listed(list, tid)
 	return false
 end
 
+function post_completion_cleanup(task_functor_name, task_id)
+	if task_functor_name == "spy_task_target_functor" then
+		local var = load_var(db.actor, task_id)
+		if not var then
+			printf("[AT] An error occurred during post completion cleanup for %s: var is nil", task_id)
+			return
+		end
+	
+		local spy_obj = var.spy_id and level.object_by_id(var.spy_id)
+		if not spy_obj then
+			printf("[AT] An error occurred during post completion cleanup for %s: spy_obj is nil", task_id)
+			return
+		end
+
+		local se_squad = var.squad_id and alife_object(var.squad_id)
+		if not se_squad then
+			printf("[AT] An error occurred during post completion cleanup for %s: se_squad is nil", task_id)
+			return
+		end
+
+		se_squad.scripted_target = nil
+		se_squad.current_action = nil
+		axr_companions.companion_squads[se_squad.id] = nil
+
+		xr_logic.restore_scheme_and_logic(spy_obj)
+		spy_obj:disable_info_portion("npcx_is_companion")
+		spy_obj:disable_info_portion("npcx_beh_cannot_dismiss")
+
+		local se_spy = alife_object(var.spy_id)
+		if se_spy then
+			local sname = se_spy:name()
+			se_save_var(var.spy_id, sname, "companion", nil)
+			se_save_var(var.spy_id, sname, "companion_cannot_dismiss", nil) 
+			se_save_var(var.spy_id, sname, "companion_cannot_teleport", nil)
+		end
+		
+		-- need to remove squad, player_id remains the original so it can get targeted by other tasks
+		SIMBOARD:remove_squad(se_squad)
+	end
+end
+
 function normalize_complete_stage(task_functor_name, stage)
 	-- Adjust complete stage for tasks like "Search and Rescue"
 	stage = tonumber(stage)
@@ -154,7 +197,7 @@ function should_autocomplete(tid, stage)
 		-- Check if task is defined in the task manager
 		local parsed_data = utils_data.parse_ini_section_to_array(task_manager.task_ini, tid)
 		if not parsed_data then
-			dbg_printf("[AT] Unable to autocomplete task: %s", tid)
+			printf("[AT] Unable to autocomplete task: %s", tid)
 		end
 
 		-- Add task to cache
@@ -208,22 +251,8 @@ task_manager.task_callback = function(tsk, stage)
 
 	local tsk_id = tsk:get_id()
 
-	-- Check if last stage
-	if stage ~= task.completed then
-		dbg_printf("[AT] No compensation for task %s: not completed yet", tsk_id)
-		task_manager_task_callback(tsk, stage)
-		return
-	end
-
-	-- Check if task id is cached
-	if (not tsk_id) or (not _task_cache[tsk_id]) then
-		dbg_printf("[AT] No compensation for task %s: task not cached", tsk_id)
-		task_manager_task_callback(tsk, stage)
-		return
-	end
-
 	-- Check if task should get autocompleted
-	if not should_autocomplete(tsk_id, _task_cache[tsk_id].stage_complete) then
+	if not should_autocomplete(tsk_id, stage) then
 		dbg_printf("[AT] No compensation for task %s: task category not enabled", tsk_id)
 		task_manager_task_callback(tsk, stage)
 		return
@@ -232,28 +261,24 @@ task_manager.task_callback = function(tsk, stage)
 	-- Get task info about task
 	local rtask = task_manager.get_task_manager().task_info[tsk_id]
 	if (not rtask) or (not rtask.on_complete) or (not rtask.on_complete[1]) or (not rtask.on_complete[1][3]) then
-		dbg_printf("[AT] No compensation for task %s: on_complete attribute is non-existent or invalid", tsk_id)
+		printf("[AT] No compensation for task %s: on_complete attribute is non-existent or invalid", tsk_id)
 		task_manager_task_callback(tsk, stage)
 		return
 	end
 
+	dbg_printf("[AT] Before edit of on complete table: \n%s", utils_data.print_table(rtask.on_complete[1][3], nil, true))
+
 	local lowest_reward = 0
 	local highest_reward = 0
 
-	local temp_unknown_attr2 = nil
 	local new_on_complete = {}
 	for _, attrs in pairs(rtask.on_complete[1][3]) do
 		-- attr[1] - attribute name (string)
-		-- attr[2] - ? (number)
-		-- attr[3] - attribute arguments (table)
+		-- attr[2] - probably size of attr (number)
+		-- attr[3] - attribute arguments (table) (optional)
 
-		if not ((attrs) and (attrs[1]) and (attrs[2])) then
+		if (not attrs) or (not attrs[1]) then
 			goto continue
-		end
-
-		-- Save the unknown variable just in case
-		if not temp_unknown_attr2 then
-			temp_unknown_attr2 = attrs[2]
 		end
 
 		local attr_name = attrs[1]
@@ -303,7 +328,7 @@ task_manager.task_callback = function(tsk, stage)
 	if (lowest_reward > 0) and (highest_reward > 0) then
 		local money_reward = {
 			"reward_random_money",
-			temp_unknown_attr2,
+			3,
 			{
 				lowest_reward,
 				highest_reward
@@ -318,5 +343,16 @@ task_manager.task_callback = function(tsk, stage)
 	dbg_printf("[AT] Total reward after item compensation with min reward %s and max reward %s", lowest_reward, highest_reward)
 	rtask.on_complete[1][3] = new_on_complete
 
+	dbg_printf("[AT] After edit of on complete table: \n%s", utils_data.print_table(rtask.on_complete[1][3], nil, true))
+
 	task_manager_task_callback(tsk, stage)
+end
+
+sim_board_simulation_board_remove_squad = sim_board.simulation_board.remove_squad
+sim_board.simulation_board.remove_squad = function(self, squad)
+	-- Stop talking with squad before releasing the squad since it causes a CTD
+	-- Needed for autocompletion of hostage tasks
+	autocomplete_tasks_utils.stop_talk_squad(squad)
+
+	sim_board_simulation_board_remove_squad(self, squad)
 end
