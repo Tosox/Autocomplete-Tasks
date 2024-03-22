@@ -49,3 +49,7 @@
 * Slightly adjusted item compensation formula
 * Removed the reward and task giver message delay for now since it was causing issues
 * Fixed task giver message for certain NPCs
+
+# v2.1.3:
+* Added support for Hostage Tasks
+* Added support for Spy Extraction Tasks
