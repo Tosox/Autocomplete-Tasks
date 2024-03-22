@@ -48,6 +48,18 @@
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_bounty_desc">
 		<text>Устраните конкретного сталкер</text>
 	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_hostage">
+		<text>Задачи заложников</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_hostage_desc">
+		<text>Уничтожьте вражеских сталкеры и спасите заложницу</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_spy_extract">
+		<text>Задачи по извлечению шпиона</text>
+	</string>
+	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_spy_extract_desc">
+		<text>Уничтожьте вражеский отряд и извлеките шпиона</text>
+	</string>
 	<string id="ui_mcm_autocomplete_tasks_at_general_tasks_fate">
 		<text>Задачи судьбы</text>
 	</string>
