@@ -251,8 +251,22 @@ task_manager.task_callback = function(tsk, stage)
 
 	local tsk_id = tsk:get_id()
 
+	-- Check if last stage
+	if stage ~= task.completed then
+		dbg_printf("[AT] No compensation for task %s: not completed yet", tsk_id)
+		task_manager_task_callback(tsk, stage)
+		return
+	end
+
+	-- Check if task id is cached
+	if (not tsk_id) or (not _task_cache[tsk_id]) then
+		dbg_printf("[AT] No compensation for task %s: task not cached", tsk_id)
+		task_manager_task_callback(tsk, stage)
+		return
+	end
+
 	-- Check if task should get autocompleted
-	if not should_autocomplete(tsk_id, stage) then
+	if not should_autocomplete(tsk_id, _task_cache[tsk_id].stage_complete) then
 		dbg_printf("[AT] No compensation for task %s: task category not enabled", tsk_id)
 		task_manager_task_callback(tsk, stage)
 		return
