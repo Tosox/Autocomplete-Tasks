@@ -7,7 +7,8 @@ local dbg_printf = autocomplete_tasks_utils.dbg_printf
 
 local CHECK_INTERVAL = 2.0
 
-local _task_cache = {}
+_task_cache = {}
+_task_compensation_prices = {}
 
 function do_autocompletion()
 	-- Check if user enabled autocompletion
@@ -99,7 +100,7 @@ function send_confirmation_message(tid, sender_id)
 	-- Check if task giver is valid
 	local sender_obj = alife_object(sender_id)
 	if not sender_obj then
-		printf("[AT] Couldn't send confirmation message: task giver is nil")
+		printf("![AT] Couldn't send confirmation message: task giver is nil")
 		return
 	end
 
@@ -108,7 +109,7 @@ function send_confirmation_message(tid, sender_id)
 	if sender_obj:clsid() == clsid.online_offline_group_s then
 		local commander_obj = alife_object(sender_obj:commander_id())
 		if not commander_obj then
-			printf("[AT] Couldn't send confirmation message: task giver is an invalid squad")
+			printf("![AT] Couldn't send confirmation message: task giver is an invalid squad")
 			return
 		end
 
@@ -117,7 +118,7 @@ function send_confirmation_message(tid, sender_id)
 
 	-- Still check if valid
 	if (not sender_obj.character_name) or (not sender_obj.community) or (not sender_obj.character_icon) then
-		printf("[AT] Couldn't send confirmation message: task giver is invalid with clsid %s", sender_obj.clsid and sender_obj:clsid())
+		printf("![AT] Couldn't send confirmation message: task giver is invalid with clsid %s", sender_obj.clsid and sender_obj:clsid())
 		return
 	end
 
@@ -143,19 +144,19 @@ function post_completion_cleanup(task_functor_name, task_id)
 	if task_functor_name == "spy_task_target_functor" then
 		local var = load_var(db.actor, task_id)
 		if not var then
-			printf("[AT] An error occurred during post completion cleanup for %s: var is nil", task_id)
+			printf("![AT] An error occurred during post completion cleanup for %s: var is nil", task_id)
 			return
 		end
 	
 		local spy_obj = var.spy_id and level.object_by_id(var.spy_id)
 		if not spy_obj then
-			printf("[AT] An error occurred during post completion cleanup for %s: spy_obj is nil", task_id)
+			printf("![AT] An error occurred during post completion cleanup for %s: spy_obj is nil", task_id)
 			return
 		end
 
 		local se_squad = var.squad_id and alife_object(var.squad_id)
 		if not se_squad then
-			printf("[AT] An error occurred during post completion cleanup for %s: se_squad is nil", task_id)
+			printf("![AT] An error occurred during post completion cleanup for %s: se_squad is nil", task_id)
 			return
 		end
 
@@ -191,6 +192,62 @@ function normalize_complete_stage(task_functor_name, stage)
 	return stage
 end
 
+function calculate_task_compensation(reward_table)
+	if not reward_table then return {}, 0, 0 end
+
+	local min_reward, max_reward = 0, 0
+	local cleaned_rewards = {}
+
+	for _, attrs in pairs(reward_table) do
+		if not attrs or not attrs[1] then goto continue end
+
+		local attr_name, attr_args = attrs[1], attrs[3]
+
+		if attr_name == "reward_money" then
+			local money = tonumber(attr_args[1])
+			min_reward = min_reward + money
+			max_reward = max_reward + money
+
+		elseif attr_name == "reward_random_money" then
+			local money_min = tonumber(attr_args[1])
+			local money_max = tonumber(attr_args[2])
+			min_reward = min_reward + money_min
+			max_reward = max_reward + money_max
+
+		elseif attr_name == "reward_item" then
+			local cost = autocomplete_tasks_utils.get_base_cost(attr_args[1])
+			local price = cost * autocomplete_tasks_utils.get_generic_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
+			min_reward = min_reward + price
+			max_reward = max_reward + price
+
+		elseif attr_name == "reward_random_item" then
+			local low, high = math.huge, -math.huge
+			for _, item in pairs(attr_args) do
+				local cost = autocomplete_tasks_utils.get_base_cost(item)
+				local price = cost * autocomplete_tasks_utils.get_generic_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
+				if price > high then high = price end
+				if price < low then low = price end
+			end
+			min_reward = min_reward + low
+			max_reward = max_reward + high
+
+		else
+			table.insert(cleaned_rewards, attrs)
+		end
+
+		::continue::
+	end
+
+	if min_reward > 0 and max_reward > 0 then
+		table.insert(cleaned_rewards, {
+			"reward_random_money", 3, { min_reward, max_reward }
+		})
+	end
+
+	return { rewards = cleaned_rewards, min = min_reward, max = max_reward }
+end
+
+
 function should_autocomplete(tid, stage)
 	-- Check if task is already cached
 	if not _task_cache[tid] then
@@ -202,6 +259,17 @@ function should_autocomplete(tid, stage)
 
 		-- Add task to cache
 		_task_cache[tid] = parsed_data or {}
+	end
+
+	if not _task_compensation_prices[tid] then
+		local tm_info = task_manager.get_task_manager().task_info[tid]
+		if not tm_info then
+			printf("[AT] Unable to get task info for task: %s", tid)
+		end
+
+		if tm_info and tm_info.on_complete and tm_info.on_complete[1] and tm_info.on_complete[1][3] then
+			_task_compensation_prices[tid] = calculate_task_compensation(tm_info.on_complete[1][3])
+		end
 	end
 
 	local tsk = _task_cache[tid]
@@ -275,87 +343,25 @@ task_manager.task_callback = function(tsk, stage)
 	-- Get task info about task
 	local rtask = task_manager.get_task_manager().task_info[tsk_id]
 	if (not rtask) or (not rtask.on_complete) or (not rtask.on_complete[1]) or (not rtask.on_complete[1][3]) then
-		printf("[AT] No compensation for task %s: on_complete attribute is non-existent or invalid", tsk_id)
+		printf("![AT] No compensation for task %s: on_complete attribute is non-existent or invalid", tsk_id)
+		task_manager_task_callback(tsk, stage)
+		return
+	end
+
+	-- Get task compensation prices
+	local compensation = _task_compensation_prices[tsk_id]
+	if not compensation then
+		printf("![AT] No compensation for task %s: no compensation prices found", tsk_id)
 		task_manager_task_callback(tsk, stage)
 		return
 	end
 
 	dbg_printf("[AT] Before edit of on complete table: \n%s", utils_data.print_table(rtask.on_complete[1][3], nil, true))
 
-	local lowest_reward = 0
-	local highest_reward = 0
-
-	local new_on_complete = {}
-	for _, attrs in pairs(rtask.on_complete[1][3]) do
-		-- attr[1] - attribute name (string)
-		-- attr[2] - probably size of attr (number)
-		-- attr[3] - attribute arguments (table) (optional)
-
-		if (not attrs) or (not attrs[1]) then
-			goto continue
-		end
-
-		local attr_name = attrs[1]
-		local attr_args = attrs[3]
-
-		if attr_name == "reward_money" then
-			local money = tonumber(attr_args[1])
-			lowest_reward = lowest_reward + money
-			highest_reward = highest_reward + money
-		elseif attr_name == "reward_random_money" then
-			local money_min = tonumber(attr_args[1])
-			local money_max = tonumber(attr_args[2])
-			lowest_reward = lowest_reward + money_min
-			highest_reward = highest_reward + money_max
-		elseif attr_name == "reward_item" then
-			dbg_printf("[AT] Compensate item %s", attr_args[1])
-			local item_cost = autocomplete_tasks_utils.get_base_cost(attr_args[1]) * autocomplete_tasks_utils.get_generic_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
-			lowest_reward = lowest_reward + item_cost
-			highest_reward = highest_reward + item_cost
-		elseif attr_name == "reward_random_item" then
-			local lowest_price = math.huge
-			local highest_price = -math.huge
-
-			for _, item in pairs(attr_args) do
-				dbg_printf("[AT] Compensate item %s", item)
-				local item_cost = autocomplete_tasks_utils.get_base_cost(item) * autocomplete_tasks_utils.get_generic_sell_discount() * get_mcm_config("at_general", "compensation_coefficient")
-
-				-- Define lowest and highest bonus price
-				if item_cost > highest_price then
-					highest_price = item_cost
-				end
-				if item_cost < lowest_price then
-					lowest_price = item_cost
-				end
-			end
-
-			lowest_reward = lowest_reward + lowest_price
-			highest_reward = highest_reward + highest_price
-		else
-			table.insert(new_on_complete, attrs)
-		end
-
-		:: continue ::
-	end
-
-	-- Add total money reward to table copy if compensation exists
-	if (lowest_reward > 0) and (highest_reward > 0) then
-		local money_reward = {
-			"reward_random_money",
-			3,
-			{
-				lowest_reward,
-				highest_reward
-			}
-
-		}
-		table.insert(new_on_complete, money_reward)
-	end
-
 	-- Assign table copy to 'on_complete' rewards table for task
 	dbg_printf("[AT] Used sell discount %s for compensation", autocomplete_tasks_utils.get_generic_sell_discount())
-	dbg_printf("[AT] Total reward after item compensation with min reward %s and max reward %s", lowest_reward, highest_reward)
-	rtask.on_complete[1][3] = new_on_complete
+	dbg_printf("[AT] Total reward after item compensation with min reward %s and max reward %s", compensation.min, compensation.max)
+	rtask.on_complete[1][3] = compensation.rewards
 
 	dbg_printf("[AT] After edit of on complete table: \n%s", utils_data.print_table(rtask.on_complete[1][3], nil, true))
 
