@@ -15,9 +15,9 @@ defaults = {
 	["at_general_tasks/measurements"] = false,
 	["at_general_tasks/scanner"] = false,
 
-	["at_special_tasks/snitch"] = true,
+	["at_special_tasks/snitch"] = false,
 	["at_special_tasks/spring_clean"] = true,
-	["at_special_tasks/defend_pump_station"] = true,
+	["at_special_tasks/defend_pump_station"] = false,
 	["at_special_tasks/destroy_btrs"] = true,
 	["at_special_tasks/research_hunt"] = false,
 	["at_special_tasks/recover_tracker"] = false,
