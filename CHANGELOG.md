@@ -43,13 +43,20 @@
 * Fixed deletion of on_complete instructions with no arguments
 * Added task "esc_2_12_stalker_wolf_task_3" to the blacklist by default
 
-# v2.1.2:
+## v2.1.2:
 * Added MCM option descriptions
 * Reworked Russian translation
 * Slightly adjusted item compensation formula
 * Removed the reward and task giver message delay for now since it was causing issues
 * Fixed task giver message for certain NPCs
 
-# v2.1.3:
+## v2.1.3:
 * Added support for Hostage Tasks
 * Added support for Spy Extraction Tasks
+
+## v2.1.4:
+* Fixed the item compensation feature
+
+## v2.1.5:
+* Improved accessibility for modders
+* Disabled autocompletion for Snitch and Defend Pump Station tasks by default
