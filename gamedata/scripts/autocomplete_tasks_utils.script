@@ -1,0 +1,162 @@
+local get_mcm_config = autocomplete_tasks_mcm.get_config
+
+local ini_trade = ini_file([[items\trade\trade_generic.ltx]])
+
+function dbg_printf(fmt, ...)
+	if not get_mcm_config("at_other", "debug") then
+		return
+	end
+    printf(fmt, ...)
+end
+
+function has_pda(who)
+    who = who or db.actor
+	if not who then
+		return false
+	end
+
+	return (who:object("device_pda_1") ~= nil)
+		or (who:object("device_pda_2") ~= nil)
+		or (who:object("device_pda_3") ~= nil)
+		or (who:object("device_pda_milspec") ~= nil)
+end
+
+function get_generic_sell_discount()
+	local condlist = ini_trade:r_string_to_condlist("trader", "discounts")
+	local sec = condlist and xr_logic.pick_section_from_condlist(db.actor, nil, condlist)
+	if not sec or sec == "" then
+		return 1
+	end
+
+	local factor = ini_trade:r_float_ex(sec, "sell") or 1
+	local eco_factor = game_difficulties.get_eco_factor("sell") or 1
+	
+	return factor * eco_factor
+end
+
+function get_base_cost(itm)
+	local sec, amount = string.match(itm, "(.*)__([1-9])")
+    if not sec then
+        return ini_sys:r_float(itm, "cost") or 0
+    end
+
+	-- itm is a multiuse item with a defined amount
+	local amount_num = tonumber(amount) or 1
+	local max_uses = ini_sys:r_float(sec, "max_uses") or amount_num
+	local cost = ini_sys:r_float(sec, "cost") or 0
+	return cost * (amount_num / max_uses)
+end
+
+function stop_talk_squad(squad)
+	if not squad then
+		return
+	end
+
+	for k in squad:squad_members() do 
+		local npc = db.storage[k.id] and db.storage[k.id].object
+		if npc and npc:is_talking() then
+			db.actor:stop_talk()
+			npc:stop_talk()
+		end
+	end
+end
+
+function parse_task_ini(task_id)
+	return utils_data.parse_ini_section_to_array(task_manager.task_ini, task_id)
+end
+
+function csv_contains(csv, elem)
+    if not csv or csv == "" or csv == "none" then
+        return false
+    end
+
+    local items = str_explode(csv, ",")
+    for i = 1, #items do
+        if items[i] == elem then
+            return true
+        end
+    end
+	
+    return false
+end
+
+function resolve_sender(sender_id)
+    local sender_obj = sender_id and alife_object(sender_id)
+    if not sender_obj then
+        return nil
+    end
+
+    -- Task giver can be squad (e.g. technician toolkit fetch tasks)
+    if sender_obj:clsid() == clsid.online_offline_group_s then
+        local commander_obj = alife_object(sender_obj:commander_id())
+        if not commander_obj then
+            return nil
+        end
+        sender_obj = commander_obj
+    end
+
+    if not sender_obj.character_name or not sender_obj.community or not sender_obj.character_icons then
+        return nil
+    end
+
+    return sender_obj
+end
+
+function send_confirmation_message(task_def, sender_id)
+    local finish_message = task_def and task_def.task_complete_descr
+    if not finish_message then
+        dbg_printf("[AT] Couldn't send confirmation message: finish message doesn't exist")
+        return
+    end
+
+    local sender_obj = resolve_sender(sender_id)
+    if not sender_obj then
+        printf("![AT] Couldn't send confirmation message: task giver is invalid")
+        return
+    end
+
+    xr_sound.set_sound_play(AC_ID, "pda_tips")
+    local title = string.format("%s, %s", sender_obj:character_name(), game.translate_string(sender_obj:community()))
+    db.actor:give_game_news(title, game.translate_string(finish_message), sender_obj:character_icon(), 0, 5000, 0)
+end
+
+function post_completion_cleanup(task_functor_name, task_id)
+    if task_functor_name == "spy_task_target_functor" then
+		local var = load_var(db.actor, task_id)
+		if not var then
+			printf("![AT] An error occurred during post completion cleanup for %s: var is nil", task_id)
+			return
+		end
+	
+		local spy_obj = var.spy_id and level.object_by_id(var.spy_id)
+		if not spy_obj then
+			printf("![AT] An error occurred during post completion cleanup for %s: spy_obj is nil", task_id)
+			return
+		end
+
+		local se_squad = var.squad_id and alife_object(var.squad_id)
+		if not se_squad then
+			printf("![AT] An error occurred during post completion cleanup for %s: se_squad is nil", task_id)
+			return
+		end
+
+		se_squad.scripted_target = nil
+		se_squad.current_action = nil
+		axr_companions.companion_squads[se_squad.id] = nil
+
+		xr_logic.restore_scheme_and_logic(spy_obj)
+		spy_obj:disable_info_portion("npcx_is_companion")
+		spy_obj:disable_info_portion("npcx_beh_cannot_dismiss")
+
+		local se_spy = alife_object(var.spy_id)
+		if se_spy then
+			local sname = se_spy:name()
+			se_save_var(var.spy_id, sname, "companion", nil)
+			se_save_var(var.spy_id, sname, "companion_cannot_dismiss", nil) 
+			se_save_var(var.spy_id, sname, "companion_cannot_teleport", nil)
+		end
+		
+		-- need to remove squad, player_id remains the original so it can get targeted by other tasks
+		SIMBOARD:remove_squad(se_squad)
+	end
+end
