@@ -1,0 +1,79 @@
+local get_mcm_config = autocomplete_tasks_mcm.get_config
+local dbg_printf = autocomplete_tasks_utils.dbg_printf
+local utils = autocomplete_tasks_utils
+
+local CHECK_INTERVAL = 2.0
+
+local task_definition_cache = {}
+
+function get_task_definition(task_id)
+    return task_definition_cache[task_id]
+end
+
+function get_or_parse_task_definition(task_id)
+    if task_definition_cache[task_id] then
+        return task_definition_cache[task_id]
+    end
+
+    local parsed = utils.parse_task_ini(task_id)
+    if not parsed then
+        printf("[AT] Unable to parse task definition: %s", task_id)
+        parsed = {}
+    end
+
+    task_definition_cache[task_id] = parsed
+    return parsed
+end
+
+function complete_task(tm, task_id, tm_info)
+    printf("[AT] Autocompleting task: %s", task_id)
+
+    local task_def = get_or_parse_task_definition(task_id)
+    utils.send_confirmation_message(task_def, tm_info and tm_info.task_giver_id)
+
+    tm:set_task_completed(task_id)
+    utils.post_completion_cleanup(task_def and task_def.target_functor, task_id)
+end
+
+function pda_requirement_ok()
+    if not get_mcm_config("at_general", "pda_check") then
+        return true
+    end
+    return utils.has_pda(db.actor)
+end
+
+function do_autocompletion()
+    if not get_mcm_config("at_general", "enable") then
+        return
+    end
+
+    if not pda_requirement_ok() then
+        return
+    end
+
+    local tm = task_manager.get_task_manager()
+    if not tm or not tm.task_info then
+        return
+    end
+
+    for task_id, tm_info in pairs(tm.task_info) do
+        local stage = tm_info and tm_info.stage
+        local task_def = get_or_parse_task_definition(task_id)
+
+        if autocomplete_tasks_rules.should_autocomplete(task_id, stage, task_def) then
+            complete_task(tm, task_id, tm_info)
+        end
+    end
+end
+
+function actor_on_first_update()
+    CreateTimeEvent("autocomplete_tasks", "check_autocomplete_tasks", CHECK_INTERVAL, function()
+        do_autocompletion()
+        ResetTimeEvent("autocomplete_tasks", "check_autocomplete_tasks", CHECK_INTERVAL)
+        return false
+    end)
+end
+
+function on_game_start()
+    RegisterScriptCallback("actor_on_first_update", actor_on_first_update)
+end

@@ -1,0 +1,75 @@
+local get_mcm_config = autocomplete_tasks_mcm.get_config
+local dbg_printf = autocomplete_tasks_utils.dbg_printf
+local utils = autocomplete_tasks_utils
+
+function calculate_task_compensation(reward_table)
+	if not reward_table then
+        return { rewards = {}, min = 0, max = 0 }
+    end
+
+	local min_reward = 0
+    local max_reward = 0
+	local cleaned_rewards = {}
+
+	for _, attrs in pairs(reward_table) do
+		if not attrs or not attrs[1] then
+            goto continue
+        end
+
+		local attr_name = attrs[1]
+        local attr_args = attrs[3] or {}
+
+		if attr_name == "reward_money" then
+			local money = tonumber(attr_args[1]) or 0
+			min_reward = min_reward + money
+			max_reward = max_reward + money
+
+		elseif attr_name == "reward_random_money" then
+			local money_min = tonumber(attr_args[1]) or 0
+			local money_max = tonumber(attr_args[2]) or 0
+			min_reward = min_reward + money_min
+			max_reward = max_reward + money_max
+
+		elseif attr_name == "reward_item" then
+			local cost = utils.get_base_cost(attr_args[1])
+			local price = cost
+                * utils.get_generic_sell_discount()
+                * get_mcm_config("at_general", "compensation_coefficient")
+			min_reward = min_reward + price
+			max_reward = max_reward + price
+
+		elseif attr_name == "reward_random_item" then
+			local low = math.huge
+            local high = -math.huge
+
+			for _, item in pairs(attr_args) do
+				local cost = utils.get_base_cost(item)
+				local price = cost
+                    * utils.get_generic_sell_discount()
+                    * get_mcm_config("at_general", "compensation_coefficient")
+				if price > high then high = price end
+				if price < low then low = price end
+			end
+
+            if low == math.huge then low = 0 end
+            if high == -math.huge then high = 0 end
+
+			min_reward = min_reward + low
+			max_reward = max_reward + high
+
+		else
+			table.insert(cleaned_rewards, attrs)
+		end
+
+		:: continue ::
+	end
+
+	if min_reward > 0 and max_reward > 0 then
+		table.insert(cleaned_rewards, {
+			"reward_random_money", 3, { min_reward, max_reward }
+		})
+	end
+
+    dbg_printf("[AT] Compensation computed: min=%s max=%s", min_reward, max_reward)
+	return { rewards = cleaned_rewards, min = min_reward, max = max_reward }
+end

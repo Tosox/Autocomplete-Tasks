@@ -1,0 +1,99 @@
+local get_mcm_config = autocomplete_tasks_mcm.get_config
+local utils = autocomplete_tasks_utils
+
+local functor_to_toggle = {
+    assault_task_target_functor = { "at_general_tasks", "assault" },
+    task_targets_lostzone_all = { "at_general_tasks", "assault" },
+
+    general_bounty_task = { "at_general_tasks", "bounty" },
+    simulation_task_target = { "at_general_tasks", "hostage" },
+    spy_task_target_functor = { "at_general_tasks", "spy_extract" },
+    general_fate = { "at_general_tasks", "fate" },
+    recover_item_on_corpse_target_functor = { "at_general_tasks", "scripted" },
+
+    general_fetch_task = { "at_general_tasks", "fetch" },
+    multifetch_target_functor = { "at_general_tasks", "fetch" },
+
+    drx_sl_quest_item_task_target = { "at_general_tasks", "retrieve" },
+
+    general_measure = { "at_general_tasks", "measurements" },
+    anomaly_scanner_task_target = { "at_general_tasks", "scanner" },
+
+    top_10_task_target_functor = { "at_special_tasks", "snitch" },
+    mutants_in_map_target = { "at_special_tasks", "spring_clean" },
+    gd_task_target_functor = { "at_special_tasks", "defend_pump_station" },
+    veh_destroy_tf = { "at_special_tasks", "destroy_btrs" },
+    yan_ecolog_semenov_task_target_1 = { "at_special_tasks", "research_hunt" },
+    recover_mutant_data_target = { "at_special_tasks", "recover_tracker" },
+}
+
+function functor_enabled(functor_name)
+    local toggle = functor_to_toggle[functor_name]
+    if not toggle then
+        return false
+    end
+    return get_mcm_config(toggle[1], toggle[2])
+end
+
+function normalize_complete_stage(functor_name, stage_complete)
+    local stage = tonumber(stage_complete)
+    if not stage then
+        return nil
+    end
+
+    -- Adjust complete stage for tasks like "Search and Rescue"
+    if functor_name == "spy_task_target_functor" then
+        stage = stage - 1
+    end
+
+    return stage
+end
+
+function should_autocomplete(task_id, current_stage, task_def)
+    if not task_id then
+        return false
+    end
+
+    task_def = task_def or {}
+
+    -- Don't autocomplete storyline tasks
+    if task_def.storyline and task_def.storyline == "true" then
+        return false
+    end
+
+    -- Whitelist overrides everything
+    if utils.csv_contains(get_mcm_config("at_other", "whitelist"), task_id) then
+        return true
+    end
+
+    -- Blacklist blocks everything
+    if utils.csv_contains(get_mcm_config("at_other", "blacklist"), task_id) then
+        return false
+    end
+
+    -- Must have target functor and it must be enabled by category
+    local functor_name = task_def.target_functor
+    if not functor_name then
+        return false
+    end
+
+    if not functor_enabled(functor_name) then
+        return false
+    end
+
+    -- Must be at last stage
+    if not current_stage then
+        return false
+    end
+
+    if not task_def.stage_complete then
+        return false
+    end
+
+    local expected = normalize_complete_stage(functor_name, task_def.stage_complete)
+    if not expected then
+        return false
+    end
+
+    return expected == tonumber(current_stage)
+end
